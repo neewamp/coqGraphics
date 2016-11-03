@@ -38,15 +38,27 @@ Definition st := pix.t pixel.t.
 
 
 (*The syntax of commands in the ocaml graphics library*)
-(*I might be fucking up the types of this thing but whatever*)
+(*I might be messing up the types of this thing but whatever*)
+(* Maybe we need a state monad I don't 
+   know where it would help currently
+   Maybe when we define the semantics we just make it a function/
+   relation that changes the state*)
+
 Inductive g_com : Type :=
 | open_graph : string -> unit -> g_com
 | close_graph : unit -> unit -> g_com
 | plot : Z -> Z -> unit -> g_com
 | plots : list (Z * Z) -> unit -> g_com
 | moveto : Z -> Z -> unit -> g_com
-| lineto : st -> Z -> Z -> st -> g_com (* so i added st instead of unit idk  if that makes sense*)
+| lineto : Z -> Z -> g_com
 | draw_rect : Z -> Z -> Z -> Z -> unit -> g_com.
+
+
+Extraction Language Ocaml.
+Extraction pix.
+Require Import Coq.extraction.ExtrOcamlZInt.
+
+Extraction "graph.ml" pix.
 
 
 
