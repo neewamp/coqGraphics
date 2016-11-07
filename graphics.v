@@ -15,20 +15,30 @@ Inductive color: Type :=
 (* The type of a single pixel's location*)
 Module pixel_l:=  PairOrderedType Z_as_OT Z_as_OT.
 
-(* A pixel is a tuple (location, color)*)
-
 (* Here is a map that we can use for state.*)
-(* Open Scope Z_scope. *)
 
 Module pix :=  FMapAVL.Make pixel_l.
+
+Definition pixtype := pix.t pixel_l.t.
+
 Print pix.
 
 
-
+Open Scope Z_scope.
 (* We should put in some notation to make the map easier  *)
 (*    to use but I think this is enough to get the general idea.*)
 Definition update (p : pixel_l.t) (pelet : color)
-  (orig : pix.t color) : pix.t color := pix.add p pelet orig.
+  (orig : pix.t color) : pix.t color := (pix.add p pelet) orig.
+
+Program Definition p := update (1,2) Red _.
+Next Obligation.
+apply pix.empty.
+Defined.
+Print p.
+
+Definition p1 := pix.add (2,2) Blue p.
+Compute pix.find (1,0) p1.
+
 
 Definition st := pix.t. (*t pixel_l.t.*)
 
@@ -47,15 +57,6 @@ Inductive g_com : Type :=
   | moveto : Z -> Z -> unit -> g_com
   | lineto : Z -> Z -> g_com
   | draw_rect : Z -> Z -> Z -> Z -> unit -> g_com.
-Lemma silly : forall (n : nat), exists (m : nat) ,  2 * n = m.
-Proof.
-  intros.
-  eauto.
-  Defined.
-
-Compute silly 3.
-
-
 
 
 Require Import Coq.extraction.ExtrOcamlZInt.
