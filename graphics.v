@@ -50,6 +50,8 @@ Definition st := pix.t. (*t pixel_l.t.*)
    relation that changes the state*)
 
 
+(* Definition open_graph : string -> unit. *)
+
 Inductive g_com : Type :=
 | open_graph : string -> unit -> g_com.
 (* | resize_window : Z -> Z -> unit -> g_com *)
@@ -61,45 +63,30 @@ Inductive g_com : Type :=
 (* | draw_rect : Z -> Z -> Z -> Z -> unit -> g_com *)
 (* | seq : g_com -> g_com -> g_com. *)
 
-Extract Inductive nat => int [ "0" "succ" ]
-       "(fun fO fS n -> if n=0 then fO () else fS (n-1))".
-
-Axiom fill : Type -> Type -> Type.
-Axiom char : Type.
-Axiom create : Type -> Type.
-Axiom s : char.
-Axiom rpos : Type.
-
-
 
 (* Definition camel_string (s : char) : string :=  *)
 (*   let r := create (length s) in *)
 (*   Fixpoint fill pos : string := "". *)
 
-Axiom name :Type.
 
-Axiom camel_string : Type -> Type.
-Axiom Y : Set -> Set -> Set.
-Extract Constant Y "'a" "'b" => " 'a*'b ".
+(* Axiom camel_string : Type -> Type. *)
+(* Axiom Y : Set -> Set -> Set. *)
+(* Extract Constant Y "'a" "'b" => " 'a*'b ". *)
 
 
-Extract Constant camel_string "'x'"  => "let camel_string (s: char list) : string =
-let r = String.create (List.length s) in
-let rec fill pos = function
-| [] -> r
-| c :: s -> r.[pos] <- c; fill (pos + 1) s
-in fill 0 s".
+(* Extract Constant camel_string "'x'"  => "let camel_string (s: char list) : string = *)
+(* let r = String.create (List.length s) in *)
+(* let rec fill pos = function *)
+(* | [] -> r *)
+(* | c :: s -> r.[pos] <- c; fill (pos + 1) s *)
+(* in fill 0 s". *)
 
-Extract Inductive g_com => g_com [ "open_graph (camel_string x)"].
+Extract Inductive g_com => g_com [ "open_graph"].
 
 Definition program1 := open_graph "200,300".
-
-
-Definition hi : string := "hi".
-
 
 
 Require Import Coq.extraction.ExtrOcamlZInt.
 Extraction Language Ocaml.
 
-Extraction "export.ml" camel_string pix g_com program1.
+Extraction "export.ml"  pix g_com program1 p1.
