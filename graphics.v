@@ -1,13 +1,12 @@
 (* To DO: 1) Finish the draw line function 
           in the section for interp on line 89
           2) Think up different specifications that would be useful*)
+(*           An example could be a specification that shows that draw
+             rectangle actually draws a rectangle*)
 
 (* Let me know if you have any questions *)
 
 Require Import PArith String FMaps FMapAVL ExtrOcamlString.
-(*So sams idea is to idendify primatives that are live within the graphics functions and to verify everything with respect to those primatives*)
-
-
 
 (* We probably need a way to express background and forground idk maybe something in the pixel type?*)
 
@@ -29,12 +28,6 @@ Module pix :=  FMapAVL.Make pixel_l.
 Definition pixtype := pix.t.
 Print pix.
 (*The state is a map and a screen size*)
-Record State :=
-  mkState
-  {
-    screen_state : pix.t color;
-    screen_size : point;
-  }.
 
 Open Scope positive_scope.
 (* We should put in some notation to make the map easier  *)
@@ -122,6 +115,30 @@ End interp.
          we defined above *)
 
 
+Record pixelState :=
+  mkPState
+  {
+    screen_state : pix.t color;
+    screen_size : point; 
+  }.
+
+(*Our usefule instance that still needs some additions but includes a 
+  way to make an initial state update the screen size and draw a pixel*)
+Instance pixelMap_graphics_prims : graphics_prims pixelState :=
+  mkGraphicsPrims
+    pixelState
+    (fun ( _ : unit) => mkPState emptyST (1020, 780))
+    (fun s p => mkPState (screen_state s) p)
+    (fun s p c => mkPState (update p c (screen_state s)) (screen_size s)).
+
+Definition prog1 : g_com :=
+  draw_rect (1,2) (3,4) Red.
+
+Compute interp (init_state tt) prog1. 
+
+    
+
+(* Play state*)
 Record boolState : Type :=
   mkStateB {
       b : bool
@@ -136,10 +153,6 @@ Instance boolState_graphics_prims : graphics_prims boolState :=
 
 Open Scope positive_scope.
 
-Definition prog1 : g_com :=
-  draw_rect (1,2) (3,4) Red.
-
-Compute interp (init_state tt) prog1. 
 
 
 
