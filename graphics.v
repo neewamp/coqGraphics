@@ -165,7 +165,7 @@ Section interp.
         let t4 := interp_draw_line t3 c (z,w) (z,y) in
         t4
       end
-    | seq g1 g2 => let st  := (interp t g1) in (interp st g1)
+    | seq g1 g2 => let st := (interp t g1) in (interp st g1)
     end.
 
   Definition run (e : g_com) : T :=
@@ -195,7 +195,7 @@ Instance pixelMap_graphics_prims : graphics_prims pixelState :=
 Definition prog1 : g_com :=
   draw_rect (1,2) (3,4) Red.
 
-Compute interp (init_state tt) prog1. 
+Compute pix.elements (screen_state (interp (init_state tt) prog1)). 
 
     
 
