@@ -9,13 +9,17 @@ Record pixelState :=
     screen_state : pix.t color;
     screen_size : point; 
   }.
+Program Definition init ( s_ : unit) := mkPState _ (1020, 780).
+Next Obligation.
+  apply pix.empty.
+  Defined.
 
 (*Our usefule instance that still needs some additions but includes a 
   way to make an initial state update the screen size and draw a pixel*)
 Instance pixelMap_graphics_prims : graphics_prims pixelState :=
   mkGraphicsPrims
     pixelState
-    (fun ( _ : unit) => mkPState emptyST (1020, 780))
+    (init)
     (fun s p => mkPState (screen_state s) p)
     (fun s p c => mkPState (update p c (screen_state s)) (screen_size s)).
 
@@ -33,7 +37,6 @@ Fixpoint toListPair (l : list (pix.key * color)) : list (pix.key):=
 Definition hi := toListPair (pix.elements (screen_state (interp (init_state tt) prog1))).
 
 Compute hi.
-
 
 (* Extraction "HiDavid.ml" hi. *)
     
@@ -60,7 +63,6 @@ Instance OGState_graphics_prims : graphics_prims OGState :=
 
 Require Import Ascii String.
 Definition s : string := "abc".
-Print s.
 
 Definition newline : ascii := ascii_of_pos 10.
 
