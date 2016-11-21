@@ -24,7 +24,7 @@ Instance pixelMap_graphics_prims : graphics_prims pixelState :=
     (fun s p c => mkPState (update p c (screen_state s)) (screen_size s)).
 
 Definition prog1 : g_com :=
-   lineto (1,2) (1,3) Red.
+   draw_rect (1,10) (4,14) Red.
   (* draw_rect (1,2) (3,4) Red. *)
 
 
