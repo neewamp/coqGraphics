@@ -51,7 +51,7 @@ Open Scope positive_scope.
 
 
 Theorem draw_order_pixel: forall (p1 p2 : point) (c1 c2 : color)
-    (st : pixelState),
+    (st : pixelState), p1 <> p2 -> 
     pix.Equal  (screen_state (draw_pixel (draw_pixel st p1 c1) p2 c2))
                (screen_state (draw_pixel (draw_pixel st p2 c2) p1 c1)).
 Proof.
@@ -61,6 +61,11 @@ Proof.
   unfold pix.Equal.
   intros .
   do 4 rewrite pix_prop.F.add_o.
+  
+  
+  
+  
+
   case_eq (pix.E.eq_dec  p1  p2).
   intros.
   apply (pix_prop.F.add_eq_b  in a.
