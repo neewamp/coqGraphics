@@ -93,97 +93,88 @@ Class graphics_prims (T :Type) :=
       draw_pixel : T -> point -> color -> T;
   }.
 
-Notation "a # b" := (Qmake a b) (at level 55, no associativity) : Q_scope.
+(* Notation "a # b" := (Qmake a b) (at level 55, no associativity) : Q_scope. *)
 
 
-Definition Qabs (q : Q) : Q := 
-match q with
-| Z0 # d => q
-| (Zpos n) # d => q
-| (Zneg n) # d => (Zpos n) # d
-end.
+(* Definition Qabs (q : Q) : Q :=  *)
+(* match q with *)
+(* | Z0 # d => q *)
+(* | (Zpos n) # d => q *)
+(* | (Zneg n) # d => (Zpos n) # d *)
+(* end. *)
 
-Require Import Coq.PArith.BinPos.
-
-
-
-Fixpoint pos_to_nat (p : positive) : nat :=
-match p with
-| xH => S O
-| xO p' => plus (pos_to_nat p') (pos_to_nat p')
-| xI p' => plus (plus (pos_to_nat p') (pos_to_nat p')) (S O)
-end.
+(* Require Import Coq.PArith.BinPos. *)
 
 
-Fixpoint nat_to_pos (n : nat) : positive :=
-match n with
-| O => xH
-| S n' => Pos.succ (nat_to_pos n')
-end.
 
-(* def distance(p1, p2): *)
-(*     dx = p2.x - p1.x *)
-(*     dy = p2.y - p1.y *)
-(*     return math.sqrt(dx**2 + dy**2) *)
+(* Fixpoint pos_to_nat (p : positive) : nat := *)
+(* match p with *)
+(* | xH => S O *)
+(* | xO p' => plus (pos_to_nat p') (pos_to_nat p') *)
+(* | xI p' => plus (plus (pos_to_nat p') (pos_to_nat p')) (S O) *)
+(* end. *)
 
 
-Definition distance (p1 p2 : point) :=
+(* Fixpoint nat_to_pos (n : nat) : positive := *)
+(* match n with *)
+(* | O => xH *)
+(* | S n' => Pos.succ (nat_to_pos n') *)
+(* end. *)
+
+
+Definition distance (p1 p2 : point) : nat :=
   let dx := (fst p2) - (fst p1) in
   let dy := (snd p2) - (snd p1) in
-  Pos.sqrt ((Pos.square dx) + (Pos.square dy)).
+  Pos.to_nat (Pos.sqrt ((Pos.square dx) + (Pos.square dy))).
+
+
+
              
-
-
-
 Section interp.
   
-  Notation "a # b" := (Qmake a b) (at level 55, no associativity) : Q_scope.
+  (* Notation "a # b" := (Qmake a b) (at level 55, no associativity) : Q_scope. *)
   Context {T : Type} `{graphics_prims T}.
   
-  Fixpoint draw_line_rc (t : T) (p : point)
-           (c : color)  (i : nat) (er der: Q) : T :=
-    match i with
-    | O => draw_pixel t p c
-    | S i' => 
-      match p with
-      | (x,y) => draw_pixel 
-       (if Qle_bool (Qmake 1 1) (Qplus er der)
-        then draw_line_rc t (x,y+1) c i'
-                          (Qplus der (Qminus er (Qmake 1 1))) der
-          else if Qle_bool  (Qplus er der) (Qmake (Zneg 1) 1)
-               then draw_line_rc t (x,y-1) c i'
-                                 (Qplus der (Qplus er (Qmake 1 1))) der
-               else draw_line_rc t p c i' (Qplus der er) der)
-                   ((x + (nat_to_pos i)),y) c
-      end  
+  Open Scope positive_scope.
+
+  Fixpoint interpolate (t : T) (n : nat)
+           (p1 p2 V: point) (D : nat) c (sub : bool) : T :=
+    match n with
+    | O => draw_pixel t p1 c
+    | 1%nat => draw_pixel t p1 c
+    | S n' => let p1' := (if sub then
+        (((fst V) * (Pos.of_nat (Nat.div n D ))) - (fst p1),                          (snd V) * (Pos.of_nat (Nat.div n D)) - (snd p1))
+        else ( (fst p1) + (fst V) * (Pos.of_nat (Nat.div n D )),                          (snd p1) + (snd V) * (Pos.of_nat (Nat.div n D))))
+    in
+      draw_pixel (interpolate t n' p1' p2 V D c sub) p1 c 
     end.
   
+
   Fixpoint draw_vline (t : T) (p : point) (c : color) (h : nat) : T :=
     match h,p with
     | O, _ => t
-    | S h', (x,y) => draw_pixel (draw_vline t p c h') (x,y+(nat_to_pos h)) c
+    | S h', (x,y) => draw_pixel (draw_vline t p c h') (x,y+(Pos.of_nat h)) c
     end.
 
   Fixpoint draw_hline (t : T) (p : point) (c : color) (w : nat) : T :=
   match w,p with
   | O, _ => t
-  | S w', (x,y) => draw_pixel (draw_hline t p c w') (x+(nat_to_pos w),y) c
+  | S w', (x,y) => draw_pixel (draw_hline t p c w') (x+(Pos.of_nat w),y) c
   end.
 
   Fixpoint fill_rect_rc (t : T) (p : point) (w h : nat) (c : color) : T :=
   match h,p with
   | O,_ => t
-  | S h',(x,y) => draw_hline (fill_rect_rc t p w h' c) (x,y+(nat_to_pos h')) c w
+  | S h',(x,y) => draw_hline (fill_rect_rc t p w h' c) (x,y+(Pos.of_nat h')) c w
   end.  
 
 
-
-  
+(* this needs a couple things and then maybe it will work*)
   Definition interp_draw_line (t : T) (c : color)
              (p1 p2 : point) : T :=
-  match p1,p2 with
-  | (x1,y1),(x2,y2) => draw_line_rc t p1 c (pos_to_nat (x2 - x1)) (-1 # 1) ((Zpos (y2 - y1)) # (x2 - x1)) 
-  end.
+    interpolate t ((distance p1 p2) - 1) p1 p2 (1,2) (distance p1 p2) c true.
+  
+
     (* draw_pixel t p1 c.  need to make this actually draw a line 
                           seems like a david thing*)
   Fixpoint interp (t : T) (e : g_com) : T :=
@@ -192,13 +183,13 @@ Section interp.
     | resize_window s_size => update_state t s_size 
     | lineto p1 p2 c => interp_draw_line t c p1 p2
     | draw_rect (x,y) (w,h) c =>
-        let w' := pos_to_nat w in
-        let h' := pos_to_nat h in
+        let w' := Pos.to_nat w in
+        let h' := Pos.to_nat h in
         let t1 := draw_hline t (x,y) c w' in
         let t2 := draw_hline t1 (x,y+h) c w' in
         let t3 := draw_vline t2 (x,y) c h' in
                   draw_vline t3 (x+w,y) c h'
-    | fill_rect p (w,h) c => fill_rect_rc t p (pos_to_nat w) (pos_to_nat h) c
+    | fill_rect p (w,h) c => fill_rect_rc t p (Pos.to_nat w) (Pos.to_nat h) c
     (*| draw_rect p1 p2 c =>
       match p1, p2 with
       | (x,y), (z,w) => (* lower-left and upper-right *)
