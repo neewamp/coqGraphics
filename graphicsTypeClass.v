@@ -13,11 +13,18 @@ Require Import Pnat QArith.
 Require Export QArith.
 (* We probably need a way to express background and forground idk maybe something in the pixel type?*)
 
-Inductive color: Type :=
+(*Inductive color: Type :=
 | Red : color
 | Blue : color
 | Green : color
-| White : color.
+| White : color. *)
+
+Definition color := Z.
+Definition Red := Zpos 1.
+Definition Blue := Zpos 1.
+Definition Green := Zpos 1.
+Definition White := Zpos 1.
+
 
 (* The type of a single pixel's location*)
 Module pixel_l:=  PairOrderedType Positive_as_OT Positive_as_OT.
@@ -168,6 +175,8 @@ Section interp.
   | O,_ => t
   | S h',(x,y) => draw_hline (fill_rect_rc t p w h' c) (x,y+(nat_to_pos h')) c w
   end.  
+
+
 
   
   Definition interp_draw_line (t : T) (c : color)
