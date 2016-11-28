@@ -61,10 +61,14 @@ Proof.
   unfold pix.Equal.
   intros .
   do 4 rewrite pix_prop.F.add_o.
+  unfold not in H.
+  case_eq (pix.E.eq_dec p2 y);
+  case_eq (pix.E.eq_dec p1 y);
+  d_and.
   
   
-  
-  
+
+
 
   case_eq (pix.E.eq_dec  p1  p2).
   intros.
