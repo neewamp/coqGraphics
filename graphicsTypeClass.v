@@ -113,6 +113,18 @@ match n with
 | S n' => Pos.succ (nat_to_pos n')
 end.
 
+(* def distance(p1, p2): *)
+(*     dx = p2.x - p1.x *)
+(*     dy = p2.y - p1.y *)
+(*     return math.sqrt(dx**2 + dy**2) *)
+
+
+Definition distance (p1 p2 : point) :=
+  let dx := (fst p2) - (fst p1) in
+  let dy := (snd p2) - (snd p1) in
+  Pos.sqrt ((Pos.square dx) + (Pos.square dy)).
+             
+
 
 
 Section interp.

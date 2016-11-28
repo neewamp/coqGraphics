@@ -1,4 +1,4 @@
-Require Import graphicsTypeClass.
+Require Import graphicsTypeClass ExtrOcamlString.
 (*example Instances We would use the State that 
 n         we defined above *)
 
@@ -34,12 +34,11 @@ Fixpoint toListPair (l : list (pix.key * color)) : list (pix.key):=
   | cons (h, c) t => cons h (toListPair t)
   end.
 
-Definition hi := toListPair (pix.elements (screen_state (interp (init_state tt) prog1))).
+Definition hi := (pix.elements (screen_state (interp (init_state tt) prog1))).
 
-Compute hi.
+Compute toListPair hi.
 
-(* Extraction "HiDavid.ml" hi. *)
-    
+
 
 (* Example very tentatively modelling extraction into ocaml*)
 
