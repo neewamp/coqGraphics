@@ -68,6 +68,7 @@ Inductive g_com : Type :=
 (* | lineto : point -> g_com *)
 (* Rec with the bottom left point followed by the top right.*)          
 | draw_rect : point -> point -> color -> g_com
+| fill_rect : point -> point -> color -> g_com
 | seq : g_com -> g_com -> g_com.
 
 Notation "a ;; b" := (seq a b) (at level 50, left associativity).
@@ -152,9 +153,22 @@ Section interp.
   
   Fixpoint draw_vline (t : T) (p : point) (c : color) (h : nat) : T :=
     match h,p with
-    | O, _ => draw_pixel t p c
+    | O, _ => t
     | S h', (x,y) => draw_pixel (draw_vline t p c h') (x,y+(nat_to_pos h)) c
     end.
+
+  Fixpoint draw_hline (t : T) (p : point) (c : color) (w : nat) : T :=
+  match w,p with
+  | O, _ => t
+  | S w', (x,y) => draw_pixel (draw_hline t p c w') (x+(nat_to_pos w),y) c
+  end.
+
+  Fixpoint fill_rect_rc (t : T) (p : point) (w h : nat) (c : color) : T :=
+  match h,p with
+  | O,_ => t
+  | S h',(x,y) => draw_hline (fill_rect_rc t p w h' c) (x,y+(nat_to_pos h')) c w
+  end.  
+
   
   Definition interp_draw_line (t : T) (c : color)
              (p1 p2 : point) : T :=
@@ -168,7 +182,15 @@ Section interp.
     | open_graph s_size => update_state t s_size
     | resize_window s_size => update_state t s_size 
     | lineto p1 p2 c => interp_draw_line t c p1 p2
-    | draw_rect p1 p2 c =>
+    | draw_rect (x,y) (w,h) c =>
+        let w' := pos_to_nat w in
+        let h' := pos_to_nat h in
+        let t1 := draw_hline t (x,y) c w' in
+        let t2 := draw_hline t1 (x,y+h) c w' in
+        let t3 := draw_vline t2 (x,y) c h' in
+                  draw_vline t3 (x+w,y) c h'
+    | fill_rect p (w,h) c => fill_rect_rc t p (pos_to_nat w) (pos_to_nat h) c
+    (*| draw_rect p1 p2 c =>
       match p1, p2 with
       | (x,y), (z,w) => (* lower-left and upper-right *)
         let t1 := interp_draw_line t c (x,y) (x,w) in
@@ -177,6 +199,7 @@ Section interp.
         let t4 := interp_draw_line t3 c (z,w) (z,y) in
         t4
       end
+    *)
     | seq g1 g2 => let st := (interp t g1) in (interp st g1)
     end.
 
