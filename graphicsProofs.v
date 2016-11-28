@@ -61,12 +61,15 @@ Proof.
   unfold pix.Equal.
   intros .
   do 4 rewrite pix_prop.F.add_o.
-  case_eq (pix.E.eq_dec p2 y).
+  case_eq (pix.E.eq_dec  p1  p2).
+  intros.
+  apply (pix_prop.F.add_eq_b  in a.
+
   intros.
   destruct a.
   destruct p1, p2.
   
-
-
+pix_prop.F.add_eq_b
+pix_prop.F.add_m
 
 Qed.
