@@ -76,8 +76,10 @@ Qed.
 
 Definition on_vline (p1 p2 : point) (h : nat) :=
 match p1,p2 with
-| (x1,y1),(x2,y2) => (x1 = x2 /\ y2 >= y1 /\ y2 < y1 + (Z.of_nat h))
+| (x1,y1),(x2,y2) => (x1 = x2 /\ y2 <= y1 /\ y1 < y2 + (Z.of_nat h))
 end.
+
+
 
 
 Notation "a ? b ; c" := ( (a -> b) /\ ((~a) -> c)) (at level 98). 
@@ -107,6 +109,7 @@ Notation "s [ p ]" := (natcol.find p (s)) (at level 97).
 Definition on_num_line (x1 x2 n : nat) :=  Nat.le x2 x1 /\ Nat.lt x1 (Nat.add x2 n).
 
 Lemma n_O_not_on_line: forall (x1 x2 : nat), on_num_line x1 x2 0 -> False.
+Proof.
 intros.
 unfold on_num_line in H.
 destruct H.
@@ -116,6 +119,13 @@ unfold Nat.lt in H0.
 unfold lt in H0.
 d_and.
 Qed.  
+
+Lemma h_O_not_on_vline: forall (x1 x2 y1 y2 : Z), on_vline (x1,y1) (x2,y2) 0 -> False.
+Proof. d_and. Qed.
+
+
+
+
 
 Lemma make_num_line_correct_aux: forall (x1 x2 n : nat), on_num_line x1 x2 (S n) ->
                                                      on_num_line x1 x2 n \/ x1 = Nat.add x2 n.
@@ -174,6 +184,35 @@ destruct H0.
 right.
 d_and.
 Qed.
+
+Lemma vline_correct_aux: forall (x1 x2 y1 y2 : Z) (h : nat) , on_vline (x1,y1) (x2,y2) (S h) ->
+                                                     on_vline (x1,y1) (x2,y2) h \/ y1 = y2 + (Z.of_nat h).
+Proof.
+d_and.
+induction h.
+{ d_and. }
+d_and.
+unfold Z.lt in *.
+unfold Z.le in *.
+unfold not in *.
+destruct (Zeq_bool y1 (y2 + (Z.of_nat h))) eqn:e.
+{
+  apply Zeq_bool_eq in e.
+  d_and.    
+  left.
+  d_and.
+  rewrite Zpos_P_of_succ_nat.
+  rewrite <- Z.add_1_r.
+  rewrite Zplus_0_r_reverse with (y2 + Z.of_nat h).
+  rewrite Z.add_assoc.
+  rewrite Zcompare_plus_compat.
+  auto.
+}
+apply Zeq_bool_neq in e.
+unfold not in e.
+rewrite Zpos_P_of_succ_nat in IHh.
+
+
 
  
 Theorem make_num_line_correct: forall (x1 x2 n : nat) (l : natcol.t color) (c : color), 
