@@ -1,6 +1,7 @@
 Require Export pixelState graphicsTypeClass.
 Module pix_prop := FMapFacts.Properties pix.
 
+
 Open Scope nat_scope.
 Ltac solve_by_inverts n :=
   match goal with | H : ?T |- _ => 
@@ -91,6 +92,7 @@ Import FMapAVL.
 Import FMaps.
 
 Module natcol := FMapAVL.Make Nat_as_OT.
+Module natcol_prop := FMapFacts.Properties natcol.
 
 
 Fixpoint make_num_line (l : natcol.t color ) (x1 n : nat) (c : color) : natcol.t color :=
@@ -196,6 +198,43 @@ d_and.
   destruct H1.
   {
     d_and.
+    rewrite <- H2.
+    apply natcol_prop.F.add_neq_o.
+    d_and.
+    unfold on_num_line in H1.
+    d_and.
+    unfold Nat.lt in H1.
+    unfold lt in H1.
+    inversion H1.
+    {
+      assert(S (x2 + n) <> (x2 + n)%nat). apply Nat.neq_succ_diag_l.
+      unfold not in H3.
+      auto.
+    }
+    d_and.
+  }
+  d_and.
+  apply natcol_prop.F.add_eq_o.
+  auto.
+}
+rewrite H0.
+{
+  symmetry.
+  apply natcol_prop.F.add_neq_o.
+  unfold not.
+  intros.
+  d_and.
+  apply H1.
+  unfold on_num_line.
+  split.
+  {
+      unfold Nat.le.
+      
+   
+  d_and.
+apply natcol_prop.F.add_neq_o.
+      assert(apply plus_n_Sm in H4.
+    SearchAbout natcol.find.
     unfold on_num_line in *.
     d_and.
     unfold Nat.le in *.
