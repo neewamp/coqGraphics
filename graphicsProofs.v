@@ -21,7 +21,7 @@ Ltac d_all n :=
     match n with
     | 0 => (  repeat simpl in *; match goal with
               | H : _/\ _  |- _ =>
-                destruct H; eauto; try solve_by_inverts 2; subst;
+                destruct H; eauto; try solve_by_inverts 1; subst;
                 try d_all 0
               | H : exists _, _|- _ => destruct H;
                            try solve_by_inverts 2; auto; try d_all 0
@@ -65,20 +65,39 @@ Proof.
   case_eq (pix.E.eq_dec p2 y);
   case_eq (pix.E.eq_dec p1 y);
   d_and.
-  
-  
-
-
-
-  case_eq (pix.E.eq_dec  p1  p2).
-  intros.
-  apply (pix_prop.F.add_eq_b  in a.
-
-  intros.
-  destruct a.
-  destruct p1, p2.
-  
-pix_prop.F.add_eq_b
-pix_prop.F.add_m
-
+  assert(False).
+  {
+    destruct p1.
+    destruct p2.
+    destruct y.
+    simpl in *.
+    subst.
+    apply H.
+    auto.
+  }
+  inversion H2.
 Qed.
+
+Notation "a ? b ; c" := ( (a -> b) /\ ((~a) -> c)) (at level 100). 
+
+Theorem vline_correct: forall (x1 y1 x2 y2 : positive) (h : nat) (c : color) (st : pixelState),
+                              (y1 = y2 /\ x2 >= x1 /\ x2 < x1 + (Pos.of_nat h)) ?
+                                   (pix.find (x2,y2) (screen_state (draw_vline st (x1,y1) c h)))  = (Some c);
+                                   (pix.find (x2,y2) (screen_state st)) = (pix.find (x2,y2) (screen_state (draw_vline st (x1,y1) c h))).
+intros.
+split;intros.
+{
+  destruct H.
+  destruct H0.
+  induction h.
+  {
+    unfold Pos.ge in H0.
+    unfold not in H0.
+    subst.
+    inversion H1.
+    unfold pix.find.
+    
+    
+  
+
+
