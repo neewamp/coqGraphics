@@ -229,30 +229,26 @@ rewrite H0.
   split.
   {
       unfold Nat.le.
-      
-   
-  d_and.
-apply natcol_prop.F.add_neq_o.
-      assert(apply plus_n_Sm in H4.
-    SearchAbout natcol.find.
-    unfold on_num_line in *.
-    d_and.
-    unfold Nat.le in *.
-    unfold Nat.lt in *.
-    unfold lt in *.
-    SearchAbout natcol.add.
-    d_and.
-    rewrite <- H2.
-    
-    d_and.
-    rewrite <- H0.
-    {
-      d_and.
-  destruct (beq_nat x1 (Nat.add x2 n)) eqn:e.
-  {
-    rewrite beq_nat_true_iff in e.
-    d_and.
-    
+      apply le_plus_l.
+  }
+  unfold Nat.lt.
+  rewrite <- plus_n_Sm.
+  unfold lt.
+  constructor.
+}
+unfold on_num_line in *.
+intros.
+apply H1.
+split.
+{ d_and. }
+d_and.
+rewrite <- plus_n_Sm.
+unfold Nat.lt in *.
+unfold Nat.le in *.
+unfold lt in *.
+constructor.
+apply H3.
+Qed.    
 
 Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelState),
     (on_vline p1 p2 h) ?
