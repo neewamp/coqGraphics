@@ -85,9 +85,135 @@ Notation "s [ p ]" := (pix.find p (screen_state s)) (at level 97).
 
 (* Lemma vline_correct' : forall (p1 p2 :  *)
 
+Print OrderedTypeEx.
+
+Import FMapAVL.
+Import FMaps.
+
+Module natcol := FMapAVL.Make Nat_as_OT.
 
 
+Fixpoint make_num_line (l : natcol.t color ) (x1 n : nat) (c : color) : natcol.t color :=
+match n with
+| O => l
+| S n' => natcol.add (Nat.add x1 n') c (make_num_line l x1 n' c)
+end.
 
+Notation "s [ p ]" := (natcol.find p (s)) (at level 97).
+
+
+Definition on_num_line (x1 x2 n : nat) :=  Nat.le x2 x1 /\ Nat.lt x1 (Nat.add x2 n).
+
+Lemma n_O_not_on_line: forall (x1 x2 : nat), on_num_line x1 x2 0 -> False.
+intros.
+unfold on_num_line in H.
+destruct H.
+rewrite <- plus_n_O in H0.
+unfold Nat.le in H.
+unfold Nat.lt in H0.
+unfold lt in H0.
+d_and.
+Qed.  
+
+Lemma make_num_line_correct_aux: forall (x1 x2 n : nat), on_num_line x1 x2 (S n) ->
+                                                     on_num_line x1 x2 n \/ x1 = Nat.add x2 n.
+Proof.
+intros.
+induction n.
+{
+  unfold on_num_line in H. 
+  d_and.
+  unfold Nat.le in H.
+  unfold Nat.lt in H0.
+  unfold lt in H0.
+  right.
+  rewrite <- plus_n_O.
+  inversion H0.
+  {
+    rewrite Nat.add_comm in H2.
+    simpl in H2.
+    apply eq_add_S.
+    apply H2.
+  }
+  d_and.
+}
+unfold on_num_line in *.
+d_and.
+unfold Nat.le in *.
+unfold Nat.lt in *.
+unfold lt in *.
+destruct (beq_nat x1 (Nat.add x2 n)) eqn:e.
+{
+  rewrite beq_nat_true_iff in e.
+  subst.
+  left.
+  split.
+  { apply H. }
+  rewrite plus_n_Sm.
+  auto.
+}
+rewrite beq_nat_false_iff in e.
+unfold not in e.
+rewrite <- plus_n_Sm in H0.
+rewrite <- plus_n_Sm in H0.
+apply Peano.le_S_n in H0.
+rewrite <- plus_n_Sm in H2.
+inversion H.
+{ d_and. }
+d_and.
+rewrite Nat.le_succ_r in H0.
+destruct H0.
+{
+  left.
+  split.
+  { d_and. }
+  d_and.
+}
+right.
+d_and.
+Qed.
+
+ 
+Theorem make_num_line_correct: forall (x1 x2 n : nat) (l : natcol.t color) (c : color), 
+                               (on_num_line x1 x2 n) ?
+                                            (make_num_line l x2 n c)[x1] = (Some c) ;
+                                            (l[x1] = ((make_num_line l x2 n c)[x1])).
+Proof.
+intros.
+induction n.
+{
+  split.
+  {
+    intros.
+    apply n_O_not_on_line in H.
+    inversion H.
+  }
+  d_and.
+}
+d_and.
+{
+  apply make_num_line_correct_aux in H1.
+  destruct H1.
+  {
+    d_and.
+    unfold on_num_line in *.
+    d_and.
+    unfold Nat.le in *.
+    unfold Nat.lt in *.
+    unfold lt in *.
+    SearchAbout natcol.add.
+    d_and.
+    rewrite <- H2.
+    
+    d_and.
+    rewrite <- H0.
+    {
+      d_and.
+  destruct (beq_nat x1 (Nat.add x2 n)) eqn:e.
+  {
+    rewrite beq_nat_true_iff in e.
+    d_and.
+    
 
 Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelState),
     (on_vline p1 p2 h) ?
