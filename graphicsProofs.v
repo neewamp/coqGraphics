@@ -80,13 +80,32 @@ end.
 Notation "a ? b ; c" := ( (a -> b) /\ ((~a) -> c)) (at level 98). 
 Notation "s [ p ]" := (pix.find p (screen_state s)) (at level 97).
 
+(* Lemma vline_correct' : forall (p1 p2 :  *)
+
 
 Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelState),
-                              (on_vline p1 p2 h) ?
-                                   (draw_vline st p2 c h)[p1] = (Some c);
-                                   st[p1] = ((draw_vline st p2 c h)[p1]).
+    (on_vline p1 p2 h) ?
+                       (draw_vline st p2 c h)[p1] = (Some c);
+      st[p1] = ((draw_vline st p2 c h)[p1]).
   Proof.
     intros.
+    unfold on_vline.
+    induction h.
+    simpl.
+    destruct p1,p2.
+    d_and.
+    admit.
+    destruct p1,p2.
+    split.
+    intros.
+    
+
+
+    induction h.    
+    simpl in *.
+    simpl.
+
+
     split;intros.
     {
       destruct H.
@@ -103,5 +122,3 @@ Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelS
   
 
 
-=======
->>>>>>> Stashed changes

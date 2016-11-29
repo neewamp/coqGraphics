@@ -27,8 +27,8 @@ Definition White := Zpos 1.
 
 
 (* The type of a single pixel's location*)
-Module pixel_l:=  PairOrderedType Positive_as_OT Positive_as_OT.
-Definition point : Type := (positive * positive).
+Module pixel_l:=  PairOrderedType Z_as_OT Z_as_OT.
+Definition point : Type := (Z * Z).
 
 (* This is the map that we can use to define the state 
     hopefully i'm making it's type soundly*)
@@ -38,7 +38,7 @@ Definition pixtype := pix.t.
 Print pix.
 (*The state is a map and a screen size*)
 
-Open Scope positive_scope.
+Open Scope Z_scope.
 (* We should put in some notation to make the map easier  *)
 (*    to use but I think this is enough to get the general idea.*)
 Definition update (p : pixel_l.t) (pelet : color)
@@ -93,86 +93,50 @@ Class graphics_prims (T :Type) :=
       draw_pixel : T -> point -> color -> T;
   }.
 
-(* Notation "a # b" := (Qmake a b) (at level 55, no associativity) : Q_scope. *)
-
-
-(* Definition Qabs (q : Q) : Q :=  *)
-(* match q with *)
-(* | Z0 # d => q *)
-(* | (Zpos n) # d => q *)
-(* | (Zneg n) # d => (Zpos n) # d *)
-(* end. *)
-
-(* Require Import Coq.PArith.BinPos. *)
-
-
-
-(* Fixpoint pos_to_nat (p : positive) : nat := *)
-(* match p with *)
-(* | xH => S O *)
-(* | xO p' => plus (pos_to_nat p') (pos_to_nat p') *)
-(* | xI p' => plus (plus (pos_to_nat p') (pos_to_nat p')) (S O) *)
-(* end. *)
-
-
-(* Fixpoint nat_to_pos (n : nat) : positive := *)
-(* match n with *)
-(* | O => xH *)
-(* | S n' => Pos.succ (nat_to_pos n') *)
-(* end. *)
-
-
 Definition distance (p1 p2 : point) : nat :=
   let dx := (fst p2) - (fst p1) in
   let dy := (snd p2) - (snd p1) in
-  Pos.to_nat (Pos.sqrt ((Pos.square dx) + (Pos.square dy))).
+  Z.to_nat (Z.sqrt ((Z.square dx) + (Z.square dy))).
 
-
-
-             
 Section interp.
   
   (* Notation "a # b" := (Qmake a b) (at level 55, no associativity) : Q_scope. *)
   Context {T : Type} `{graphics_prims T}.
   
-  Open Scope positive_scope.
-
   Fixpoint interpolate (t : T) (n : nat)
-           (p1 p2 V: point) (D : nat) c (sub : bool) : T :=
+           (p1 p2 V: point) (D : nat) c : T :=
     match n with
     | O => draw_pixel t p1 c
     | 1%nat => draw_pixel t p1 c
-    | S n' => let p1' := (if sub then
-        (((fst V) * (Pos.of_nat (Nat.div n D ))) - (fst p1),                          (snd V) * (Pos.of_nat (Nat.div n D)) - (snd p1))
-        else ( (fst p1) + (fst V) * (Pos.of_nat (Nat.div n D )),                          (snd p1) + (snd V) * (Pos.of_nat (Nat.div n D))))
+    | S n' => let p1' := ( (fst p1) + (fst V) * (Z.of_nat (Nat.div n D )),                  (snd p1) + (snd V) * (Z.of_nat (Nat.div n D)))
     in
-      draw_pixel (interpolate t n' p1' p2 V D c sub) p1 c 
+      draw_pixel (interpolate t n' p1' p2 V D c) p1 c 
     end.
   
 
   Fixpoint draw_vline (t : T) (p : point) (c : color) (h : nat) : T :=
     match h,p with
     | O, _ => t
-    | S h', (x,y) => draw_pixel (draw_vline t p c h') (x,y+(Pos.of_nat h)) c
+    | S h', (x,y) => draw_pixel (draw_vline t p c h') (x,y+(Z.of_nat h)) c
     end.
 
   Fixpoint draw_hline (t : T) (p : point) (c : color) (w : nat) : T :=
   match w,p with
   | O, _ => t
-  | S w', (x,y) => draw_pixel (draw_hline t p c w') (x+(Pos.of_nat w),y) c
+  | S w', (x,y) => draw_pixel (draw_hline t p c w') (x+(Z.of_nat w),y) c
   end.
 
   Fixpoint fill_rect_rc (t : T) (p : point) (w h : nat) (c : color) : T :=
   match h,p with
   | O,_ => t
-  | S h',(x,y) => draw_hline (fill_rect_rc t p w h' c) (x,y+(Pos.of_nat h')) c w
+  | S h',(x,y) => draw_hline (fill_rect_rc t p w h' c) (x,y+(Z.of_nat h')) c w
   end.  
 
 
 (* this needs a couple things and then maybe it will work*)
   Definition interp_draw_line (t : T) (c : color)
              (p1 p2 : point) : T :=
-    interpolate t ((distance p1 p2) - 1) p1 p2 (1,2) (distance p1 p2) c true.
+    interpolate t ((distance p1 p2) - 1) p1 p2 ((fst p2) - (fst p1), (snd p2) - (snd p1) ) (distance p1 p2) c.
   
 
     (* draw_pixel t p1 c.  need to make this actually draw a line 
@@ -183,13 +147,13 @@ Section interp.
     | resize_window s_size => update_state t s_size 
     | lineto p1 p2 c => interp_draw_line t c p1 p2
     | draw_rect (x,y) (w,h) c =>
-        let w' := Pos.to_nat w in
-        let h' := Pos.to_nat h in
+        let w' := Z.to_nat w in
+        let h' := Z.to_nat h in
         let t1 := draw_hline t (x,y) c w' in
         let t2 := draw_hline t1 (x,y+h) c w' in
         let t3 := draw_vline t2 (x,y) c h' in
                   draw_vline t3 (x+w,y) c h'
-    | fill_rect p (w,h) c => fill_rect_rc t p (Pos.to_nat w) (Pos.to_nat h) c
+    | fill_rect p (w,h) c => fill_rect_rc t p (Z.to_nat w) (Z.to_nat h) c
     (*| draw_rect p1 p2 c =>
       match p1, p2 with
       | (x,y), (z,w) => (* lower-left and upper-right *)
