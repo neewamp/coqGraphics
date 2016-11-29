@@ -30,12 +30,14 @@ Ltac d_all n :=
                                 try d_all 0
               | H :~ _ |-  _ => unfold not in H; simpl in *; intros;
                                try solve_by_inverts 1; auto; try d_all 0
-      
-              | _ => auto; try solve_by_inverts 2; try d_all 1
+              | [H : ?T ?P -> ?Q, H' : ?P |- _ ] => 
+                assert (1 = 1);
+                   apply H in H'; auto; try d_all 0
+              | _ => auto; try solve_by_inverts 1; try d_all 1
               end)
     | S ?n' =>  match goal with
                 | H : _ \/ _ |- _ => destruct H; auto;
-                                     solve_by_inverts 2; try d_all 0
+                                     solve_by_inverts 1; try d_all 0
                 | _ => intuition; try solve_by_inverts 1
                 end
   end.
@@ -46,9 +48,6 @@ Ltac d_or :=
   d_all 1.
 
 Open Scope positive_scope.
-
-
-
 
 Theorem draw_order_pixel: forall (p1 p2 : point) (c1 c2 : color)
     (st : pixelState), p1 <> p2 -> 
@@ -65,17 +64,10 @@ Proof.
   case_eq (pix.E.eq_dec p2 y);
   case_eq (pix.E.eq_dec p1 y);
   d_and.
-  assert(False).
-  {
-    destruct p1.
-    destruct p2.
-    destruct y.
-    simpl in *.
-    subst.
-    apply H.
-    auto.
-  }
-  inversion H2.
+  destruct p1,p2,y.
+  simpl in *.
+  subst.
+  destruct H; auto.
 Qed.
 
 Notation "a ? b ; c" := ( (a -> b) /\ ((~a) -> c)) (at level 100). 
@@ -84,20 +76,23 @@ Theorem vline_correct: forall (x1 y1 x2 y2 : positive) (h : nat) (c : color) (st
                               (y1 = y2 /\ x2 >= x1 /\ x2 < x1 + (Pos.of_nat h)) ?
                                    (pix.find (x2,y2) (screen_state (draw_vline st (x1,y1) c h)))  = (Some c);
                                    (pix.find (x2,y2) (screen_state st)) = (pix.find (x2,y2) (screen_state (draw_vline st (x1,y1) c h))).
-intros.
-split;intros.
-{
-  destruct H.
-  destruct H0.
-  induction h.
-  {
-    unfold Pos.ge in H0.
-    unfold not in H0.
-    subst.
-    inversion H1.
-    unfold pix.find.
-    
+  Proof.
+    intros.
+    split;intros.
+    {
+      destruct H.
+      destruct H0.
+      induction h.
+      {
+        unfold Pos.ge in H0.
+        unfold not in H0.
+        subst.
+        inversion H1.
+        unfold pix.find.
+        
     
   
 
 
+=======
+>>>>>>> Stashed changes
