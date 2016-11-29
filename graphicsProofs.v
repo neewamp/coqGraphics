@@ -70,12 +70,21 @@ Proof.
   destruct H; auto.
 Qed.
 
-Notation "a ? b ; c" := ( (a -> b) /\ ((~a) -> c)) (at level 100). 
 
-Theorem vline_correct: forall (x1 y1 x2 y2 : positive) (h : nat) (c : color) (st : pixelState),
-                              (y1 = y2 /\ x2 >= x1 /\ x2 < x1 + (Pos.of_nat h)) ?
-                                   (pix.find (x2,y2) (screen_state (draw_vline st (x1,y1) c h)))  = (Some c);
-                                   (pix.find (x2,y2) (screen_state st)) = (pix.find (x2,y2) (screen_state (draw_vline st (x1,y1) c h))).
+Definition on_vline (p1 p2 : point) (h : nat) :=
+match p1,p2 with
+| (x1,y1),(x2,y2) => (y1 = y2 /\ x2 >= x1 /\ x2 < x1 + (Pos.of_nat h))
+end.
+
+
+Notation "a ? b ; c" := ( (a -> b) /\ ((~a) -> c)) (at level 98). 
+Notation "s [ p ]" := (pix.find p (screen_state s)) (at level 97).
+
+
+Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelState),
+                              (on_vline p1 p2 h) ?
+                                   (draw_vline st p2 c h)[p1] = (Some c);
+                                   st[p1] = ((draw_vline st p2 c h)[p1]).
   Proof.
     intros.
     split;intros.
