@@ -47,7 +47,7 @@ Ltac d_and :=
 Ltac d_or :=
   d_all 1.
 
-Open Scope positive_scope.
+Open Scope Z_scope.
 
 Theorem draw_order_pixel: forall (p1 p2 : point) (c1 c2 : color)
     (st : pixelState), p1 <> p2 -> 
@@ -73,7 +73,7 @@ Qed.
 
 Definition on_vline (p1 p2 : point) (h : nat) :=
 match p1,p2 with
-| (x1,y1),(x2,y2) => (y1 = y2 /\ x2 >= x1 /\ x2 < x1 + (Pos.of_nat h))
+| (x1,y1),(x2,y2) => (y1 = y2 /\ x2 >= x1 /\ x2 < x1 + (Z.of_nat h))
 end.
 
 
@@ -89,36 +89,21 @@ Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelS
       st[p1] = ((draw_vline st p2 c h)[p1]).
   Proof.
     intros.
+    destruct p1,p2.
     unfold on_vline.
-    induction h.
-    simpl.
-    destruct p1,p2.
-    d_and.
-    admit.
-    destruct p1,p2.
-    split.
-    intros.
-    
-
-
-    induction h.    
-    simpl in *.
-    simpl.
-
-
-    split;intros.
+    induction h; d_and; subst.
     {
-      destruct H.
-      destruct H0.
-      induction h.
-      {
-        unfold Pos.ge in H0.
-        unfold not in H0.
-        subst.
-        inversion H1.
-        unfold pix.find.
-        
-    
+      rewrite <- Zplus_0_r_reverse in H2.
+      inversion H2.
+      unfold Z.ge in H.
+      unfold not in H.
+      assert(False). apply H. apply H1.
+      inversion H0.
+    }
+    {
+       simpl.         
+         
+      
   
 
 
