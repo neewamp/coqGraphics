@@ -185,6 +185,10 @@ right.
 d_and.
 Qed.
 
+Lemma fold_not: forall (T : Type) (t1 t2 : T), (t1 = t2 -> False) <-> t1 <> t2.
+Proof. d_and. Qed.
+
+
 Lemma vline_correct_aux: forall (x1 x2 y1 y2 : Z) (h : nat) , on_vline (x1,y1) (x2,y2) (S h) ->
                                                      on_vline (x1,y1) (x2,y2) h \/ y1 = y2 + (Z.of_nat h).
 Proof.
@@ -211,6 +215,19 @@ destruct (Zeq_bool y1 (y2 + (Z.of_nat h))) eqn:e.
 apply Zeq_bool_neq in e.
 unfold not in e.
 rewrite Zpos_P_of_succ_nat in IHh.
+destruct Dcompare with (y2 ?= y1).
+rewrite fold_not in H.
+
+rewrite Qle_alt in H.
+SearchAbout Gt.
+
+assert(
+
+rewrite Zpos_P_of_succ_nat in H0.
+left.
+d_and.
+
+
 
 
 
