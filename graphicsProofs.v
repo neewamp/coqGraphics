@@ -129,8 +129,9 @@ Proof. d_and. Qed.
 
 
 
-Lemma make_num_line_correct_aux: forall (x1 x2 n : nat), on_num_line x1 x2 (S n) ->
-                                                     on_num_line x1 x2 n \/ x1 = Nat.add x2 n.
+Lemma make_num_line_correct_aux: forall (x1 x2 n : nat), 
+   on_num_line x1 x2 (S n) ->
+       on_num_line x1 x2 n \/ x1 = Nat.add x2 n.
 Proof.
 intros.
 induction n.
