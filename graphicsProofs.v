@@ -193,8 +193,9 @@ Proof. d_and. Qed.
 Lemma vline_correct_aux2 : forall (a b : Z) (n : nat), (a ?= b + (Z.of_nat n)) = Gt -> (a ?= b) = Gt.
 Admitted.
 
-Lemma vline_correct_aux: forall (x1 x2 y1 y2 : Z) (h : nat) , on_vline (x1,y1) (x2,y2) (S h) ->
-                                                     on_vline (x1,y1) (x2,y2) h \/ y1 = y2 + (Z.of_nat h).
+Lemma vline_correct_aux: forall (x1 x2 y1 y2 : Z) (h : nat) ,
+  on_vline (x1,y1) (x2,y2) (S h) ->
+        on_vline (x1,y1) (x2,y2) h \/ y1 = y2 + (Z.of_nat h).
 Proof.
 d_and.
 unfold Z.lt in *.
