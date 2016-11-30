@@ -122,7 +122,7 @@ unfold lt in H0.
 d_and.
 Qed.  
 
-Lemma h_O_not_on_vline: forall (x1 x2 y1 y2 : Z), on_vline (x1,y1) (x2,y2) 0 -> False.
+Lemma h_O_not_on_vline: forall (x1 x2 y1 y2 : Z), on_vline (x1,y1) (x2,y2) 0 <-> False.
 Proof. d_and. Qed.
 
 
@@ -191,12 +191,10 @@ Qed.
 Lemma fold_not: forall (T : Type) (t1 t2 : T), (t1 = t2 -> False) <-> t1 <> t2.
 Proof. d_and. Qed.
 
-Lemma vline_correct_aux2 : forall (a b : Z) (n : nat), (a ?= b + (Z.of_nat n)) = Gt -> (a ?= b) = Gt.
-Admitted.
 
 Lemma vline_correct_aux: forall (x1 x2 y1 y2 : Z) (h : nat) ,
   on_vline (x1,y1) (x2,y2) (S h) ->
-        on_vline (x1,y1) (x2,y2) h \/ y1 = y2 + (Z.of_nat h).
+        on_vline (x1,y1) (x2,y2) h \/ (y1 = y2 + (Z.of_nat h) /\ x1 = x2).
 Proof.
 d_and.
 unfold Z.lt in *.
@@ -242,39 +240,34 @@ induction n.
   }
   d_and.
 }
-d_and.
+split.
 {
-  apply make_num_line_correct_aux in H1.
-  destruct H1.
+  intros.
+  apply make_num_line_correct_aux in H.
+  destruct H.
   {
     d_and.
     rewrite <- H2.
     apply natcol_prop.F.add_neq_o.
     d_and.
-    unfold on_num_line in H1.
-    d_and.
-    unfold Nat.lt in H1.
-    unfold lt in H1.
-    inversion H1.
-    {
-      assert(S (x2 + n) <> (x2 + n)%nat). apply Nat.neq_succ_diag_l.
-      unfold not in H3.
-      auto.
-    }
+    unfold on_num_line in *.
+    unfold Nat.lt in *.
+    unfold lt in *.
     d_and.
   }
   d_and.
   apply natcol_prop.F.add_eq_o.
   auto.
 }
-rewrite H0.
+d_and.
+rewrite H1.
 {
   symmetry.
   apply natcol_prop.F.add_neq_o.
   unfold not.
   intros.
   d_and.
-  apply H1.
+  apply H.
   unfold on_num_line.
   split.
   {
@@ -288,10 +281,8 @@ rewrite H0.
 }
 unfold on_num_line in *.
 intros.
-apply H1.
-split.
-{ d_and. }
 d_and.
+apply H.
 rewrite <- plus_n_Sm.
 unfold Nat.lt in *.
 unfold Nat.le in *.
@@ -304,6 +295,21 @@ Qed.
 Notation "s [ p ]" := (pix.find p (screen_state s)) (at level 97).
 
 
+
+
+Theorem vline_correct_aux3: forall (x1 x2 y1 y2 : Z) (c : color)  (st : pixelState) (h : nat),
+               x1<>x2 -> st[(x1,y1)] = ((draw_vline st (x2,y2) c h)[(x1,y1)]).
+Proof.
+intros.
+induction h.
+{ d_and. }
+d_and.
+rewrite pix_prop.F.add_neq_o.
+{ d_and. }
+d_and.
+Qed.
+
+
 Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelState),
     (on_vline p1 p2 h) ?
                        (draw_vline st p2 c h)[p1] = (Some c);
@@ -313,114 +319,71 @@ intros.
 destruct p1 as (x1,y1).
 destruct p2 as (x2,y2).
 induction h.
-{ 
+{
+  intros.
+  split.
+  {
+   intros.
+   rewrite h_O_not_on_vline in H.
+   inversion H.
+  }
   d_and.
-  unfold Z.lt in H2.
-  unfold Z.le in H.
-  rewrite <- Zplus_0_r_reverse in H2.
-  
-  d_and.
-  exfalso.
-  apply H.
-  
-  SearchAbout Z.add.
-  
-  exfalso.
-  eapply h_O_not_on_vline.
-  apply H.
-  
-  
-  
-
- }
-  
-    unfold on_vline.
-    intros.
-    
-    destruct p1 as [x1 y1].
-    destruct p2 as [x2 y2].
+}
+intros.
+split.
+{
+  intros.
+  apply vline_correct_aux in H.
+  destruct H.
+  {
+    simpl.
+    rewrite pix_prop.F.add_neq_o.
+    {
+      edestruct IHh.
+      unfold on_vline in *.
+      destruct H.
+      d_and.
+    }
     d_and.
-    {
-      induction h.
-      generalize dependent y1.
-      generalize dependent y2.
-      {
-        d_and.
-        rewrite <- Zplus_0_r_reverse in H2.
-        uncomp.
-        exfalso.
-        apply H.
-        apply H2.
-      }
-      uncomp.
-      d_and.
-      erewrite <- IHh.
-      cbv.
-      auto.
-                
-        
-        
-      
+  }
+  d_and.
+  apply pix_prop.F.add_eq_o.
+  d_and.
+}
+unfold not.
+intros.
+simpl.
+rewrite pix_prop.F.add_neq_o.
+{
+  destruct IHh.
+  apply H1.
+  unfold not.
+  intros.
+  apply H.
+  simpl.
+  split.
+  { d_and. }
+  d_and.
+  unfold Z.lt in *.
+  unfold Z.le in *.
+  apply Zcompare_Lt_trans with (y2 + Z.of_nat h).
+  { d_and. }
+  rewrite Z.add_compare_mono_l.
+  rewrite Zpos_P_of_succ_nat.
+  apply Z.lt_succ_diag_r. 
+}
+d_and.
+apply H0.
+{ d_and. }
+unfold Z.lt.
+rewrite Zpos_P_of_succ_nat.
+rewrite Z.add_compare_mono_l.
+apply Z.lt_succ_diag_r.
+Qed.
 
-    split.
-    {
-      intros.
-      destruct p1 as [x1 y1].
-      destruct p2 as [x2 y2].
-      generalize dependent x1.
-      generalize dependent x2.
-      induction h; intros.
-      {
-         d_and.         
-         rewrite <- Zplus_0_r_reverse in H0.
-         unfold Z.ge in H.
-         unfold not in H.
-         unfold Z.lt in H0.
-         assert(HF: False). apply H. apply H0.
-         inversion HF.
-      }
-      d_and.
-      destruct IHh with x2 (Z.succ x1).
-      {
-        split.
-        { auto. }
-        split.
-        {
-          unfold Z.ge in *.
-          unfold not in *.
-          intros.
-          unfold Z.lt in *.
-        
-          
-        subst.
-            
-            
-        Focus 2.
-        
-        
-        
-        split.
-        apply H.
-     
-        auto.
-        split.
-      destruct H0.
-      unfold Z.ge in H0.
-      unfold not in H0.
-      unfold Z.lt in H1.
-      
-                  
-         unf
-      intros.
-    induction h; d_and; subst.
-    {
-      rewrite <- Zplus_0_r_reverse in H2.
-      inversion H2.
-      unfold Z.ge in H.
-      unfold not in H.
-      assert(False). apply H. apply H1.
-      inversion H0.
-Admitted.
+  
+ 
+
 
 Definition in_rect         
          
