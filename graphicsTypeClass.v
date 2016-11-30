@@ -80,16 +80,14 @@ Inductive g_com : Type :=
 
 Notation "a ;; b" := (seq a b) (at level 50, left associativity).
 
-(*These are going to be the basic 
-  functions that we build everything from*)
+(*These are the basic 
+  primitives that we build everything from*)
 Class graphics_prims (T :Type) :=
   mkGraphicsPrims
     {
       init_state : unit -> T;
       update_state : T -> point -> T;
-    (*This might have to take a color 
-      or maybe we need to have a current 
-      color in the state, feels more like the ocaml library*)
+      (*Add an update color*)
       draw_pixel : T -> point -> color -> T;
   }.
 
