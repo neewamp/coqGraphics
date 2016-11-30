@@ -103,6 +103,8 @@ match n with
 | S n' => natcol.add (Nat.add x1 n') c (make_num_line l x1 n' c)
 end.
 
+
+
 Notation "s [ p ]" := (natcol.find p (s)) (at level 97).
 
 
@@ -188,13 +190,12 @@ Qed.
 Lemma fold_not: forall (T : Type) (t1 t2 : T), (t1 = t2 -> False) <-> t1 <> t2.
 Proof. d_and. Qed.
 
+Lemma vline_correct_aux2 : forall (a b : Z) (n : nat), (a ?= b + (Z.of_nat n)) = Gt -> (a ?= b) = Gt.
+Admitted.
 
 Lemma vline_correct_aux: forall (x1 x2 y1 y2 : Z) (h : nat) , on_vline (x1,y1) (x2,y2) (S h) ->
                                                      on_vline (x1,y1) (x2,y2) h \/ y1 = y2 + (Z.of_nat h).
 Proof.
-d_and.
-induction h.
-{ d_and. }
 d_and.
 unfold Z.lt in *.
 unfold Z.le in *.
@@ -202,34 +203,25 @@ unfold not in *.
 destruct (Zeq_bool y1 (y2 + (Z.of_nat h))) eqn:e.
 {
   apply Zeq_bool_eq in e.
-  d_and.    
-  left.
   d_and.
-  rewrite Zpos_P_of_succ_nat.
-  rewrite <- Z.add_1_r.
-  rewrite Zplus_0_r_reverse with (y2 + Z.of_nat h).
-  rewrite Z.add_assoc.
-  rewrite Zcompare_plus_compat.
-  auto.
 }
 apply Zeq_bool_neq in e.
-unfold not in e.
-rewrite Zpos_P_of_succ_nat in IHh.
-destruct Dcompare with (y2 ?= y1).
-rewrite fold_not in H.
-
-rewrite Qle_alt in H.
-SearchAbout Gt.
-
-assert(
-
-rewrite Zpos_P_of_succ_nat in H0.
-left.
 d_and.
 
-
-
-
+destruct Dcompare with (y1 ?= y2 + Z.of_nat h); d_and.
+{
+  apply Z.compare_eq in H1.
+  d_and.
+}
+rewrite Zpos_P_of_succ_nat in H0.
+apply Zcompare_Gt_not_Lt in H2.
+exfalso.
+unfold not in H2.
+apply H2.
+rewrite <- Z.add_assoc.
+rewrite Z.add_1_r.
+apply H0.
+Qed.
 
  
 Theorem make_num_line_correct: forall (x1 x2 n : nat) (l : natcol.t color) (c : color), 
@@ -306,11 +298,40 @@ constructor.
 apply H3.
 Qed.    
 
+
+Notation "s [ p ]" := (pix.find p (screen_state s)) (at level 97).
+
+
 Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelState),
     (on_vline p1 p2 h) ?
-                       (draw_hline st p2 c h)[p1] = (Some c);
-      st[p1] = ((draw_hline st p2 c h)[p1]).
-  Proof.
+                       (draw_vline st p2 c h)[p1] = (Some c);
+      st[p1] = ((draw_vline st p2 c h)[p1]).
+Proof.
+intros.
+destruct p1 as (x1,y1).
+destruct p2 as (x2,y2).
+induction h.
+{ 
+  d_and.
+  unfold Z.lt in H2.
+  unfold Z.le in H.
+  rewrite <- Zplus_0_r_reverse in H2.
+  
+  d_and.
+  exfalso.
+  apply H.
+  
+  SearchAbout Z.add.
+  
+  exfalso.
+  eapply h_O_not_on_vline.
+  apply H.
+  
+  
+  
+
+ }
+  
     unfold on_vline.
     intros.
     

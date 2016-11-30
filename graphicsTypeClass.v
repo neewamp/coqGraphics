@@ -117,13 +117,13 @@ Section interp.
   Fixpoint draw_vline (t : T) (p : point) (c : color) (h : nat) : T :=
     match h,p with
     | O, _ => t
-    | S h', (x,y) => draw_pixel (draw_vline t p c h') (x,y+(Z.of_nat h)) c
+    | S h', (x,y) => draw_pixel (draw_vline t p c h') (x,y+(Z.of_nat h')) c
     end.
 
   Fixpoint draw_hline (t : T) (p : point) (c : color) (w : nat) : T :=
   match w,p with
   | O, _ => t
-  | S w', (x,y) => draw_pixel (draw_hline t p c w') (x+(Z.of_nat w),y) c
+  | S w', (x,y) => draw_pixel (draw_hline t p c w') (x+(Z.of_nat w'),y) c
   end.
 
   Fixpoint fill_rect_rc (t : T) (p : point) (w h : nat) (c : color) : T :=
