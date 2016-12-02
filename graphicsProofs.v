@@ -79,6 +79,15 @@ match p1,p2 with
 | (x1,y1),(x2,y2) => (x1 = x2 /\ y2 <= y1 /\ y1 < y2 + (Z.of_nat h))
 end.
 
+Definition on_hline (p1 p2 : point) (w : nat) :=
+match p1,p2 with
+| (x1,y1),(x2,y2) => (y1 = y2 /\ x2 <= x1 /\ x1 < x2 + (Z.of_nat w))
+end.
+
+Definition in_rect (p1 p2 : point) (w h : nat) :=
+match p1,p2 with
+| (x1,y1),(x2,y2) => (x1 >= x2 /\ y1 >= y2 /\ x1 < x2+Z.of_nat w /\ y1 < y2 + Z.of_nat h)
+end.
 
 
 
@@ -120,11 +129,15 @@ unfold Nat.le in H.
 unfold Nat.lt in H0.
 unfold lt in H0.
 d_and.
-Qed.  
+Qed.
+
+  
 
 Lemma h_O_not_on_vline: forall (x1 x2 y1 y2 : Z), on_vline (x1,y1) (x2,y2) 0 <-> False.
 Proof. d_and. Qed.
 
+Lemma w_O_not_on_hline: forall (x1 x2 y1 y2 : Z), on_hline (x1,y1) (x2,y2) 0 <-> False.
+Proof. d_and. Qed.
 
 
 
@@ -223,6 +236,36 @@ rewrite Z.add_1_r.
 apply H0.
 Qed.
 
+Lemma hline_correct_aux: forall (x1 x2 y1 y2 : Z) (w : nat) ,
+  on_hline (x1,y1) (x2,y2) (S w) ->
+        on_hline (x1,y1) (x2,y2) w \/ (x1 = x2 + (Z.of_nat w) /\ y1 = y2).
+Proof.
+d_and.
+unfold Z.lt in *.
+unfold Z.le in *.
+unfold not in *.
+destruct (Zeq_bool x1 (x2 + (Z.of_nat w))) eqn:e.
+{
+  apply Zeq_bool_eq in e.
+  d_and.
+}
+apply Zeq_bool_neq in e.
+d_and.
+destruct Dcompare with (x1 ?= x2 + Z.of_nat w); d_and.
+{
+  apply Z.compare_eq in H1.
+  d_and.
+}
+rewrite Zpos_P_of_succ_nat in H0.
+apply Zcompare_Gt_not_Lt in H2.
+exfalso.
+unfold not in H2.
+apply H2.
+rewrite <- Z.add_assoc.
+rewrite Z.add_1_r.
+apply H0.
+Qed.
+
  
 Theorem make_num_line_correct: forall (x1 x2 n : nat) (l : natcol.t color) (c : color), 
                                (on_num_line x1 x2 n) ?
@@ -297,19 +340,6 @@ Notation "s [ p ]" := (pix.find p (screen_state s)) (at level 97).
 
 
 
-Theorem vline_correct_aux3: forall (x1 x2 y1 y2 : Z) (c : color)  (st : pixelState) (h : nat),
-               x1<>x2 -> st[(x1,y1)] = ((draw_vline st (x2,y2) c h)[(x1,y1)]).
-Proof.
-intros.
-induction h.
-{ d_and. }
-d_and.
-rewrite pix_prop.F.add_neq_o.
-{ d_and. }
-d_and.
-Qed.
-
-
 Theorem vline_correct: forall (p1 p2 : point) (h : nat) (c : color) (st : pixelState),
     (on_vline p1 p2 h) ?
                        (draw_vline st p2 c h)[p1] = (Some c);
@@ -380,6 +410,350 @@ rewrite Zpos_P_of_succ_nat.
 rewrite Z.add_compare_mono_l.
 apply Z.lt_succ_diag_r.
 Qed.
+
+Theorem hline_correct: forall (p1 p2 : point) (w : nat) (c : color) (st : pixelState),
+    (on_hline p1 p2 w) ?
+                       (draw_hline st p2 c w)[p1] = (Some c);
+      st[p1] = ((draw_hline st p2 c w)[p1]).
+Proof.
+intros.
+destruct p1 as (x1,y1).
+destruct p2 as (x2,y2).
+induction w.
+{
+  intros.
+  split.
+  {
+   intros.
+   rewrite w_O_not_on_hline in H.
+   inversion H.
+  }
+  d_and.
+}
+intros.
+split.
+{
+  intros.
+  apply hline_correct_aux in H.
+  destruct H.
+  {
+    simpl.
+    rewrite pix_prop.F.add_neq_o.
+    {
+      edestruct IHw.
+      unfold on_hline in *.
+      destruct H.
+      d_and.
+    }
+    d_and.
+  }
+  d_and.
+  apply pix_prop.F.add_eq_o.
+  d_and.
+}
+unfold not.
+intros.
+simpl.
+rewrite pix_prop.F.add_neq_o.
+{
+  destruct IHw.
+  apply H1.
+  unfold not.
+  intros.
+  apply H.
+  simpl.
+  split.
+  { d_and. }
+  d_and. 
+  unfold Z.lt in *.
+  unfold Z.le in *.
+  apply Zcompare_Lt_trans with (x2 + Z.of_nat w).
+  { d_and. }
+  rewrite Z.add_compare_mono_l.
+  rewrite Zpos_P_of_succ_nat.
+  apply Z.lt_succ_diag_r. 
+}
+d_and.
+apply H0.
+{ d_and. }
+unfold Z.lt.
+rewrite Zpos_P_of_succ_nat.
+rewrite Z.add_compare_mono_l.
+apply Z.lt_succ_diag_r.
+Qed.
+
+
+Theorem rect_spec_hline: forall (x1 x2 y1 y2 y : Z) (w h : nat),
+               (y2 <= y /\ y < y2 + Z.of_nat h) -> (in_rect (x1,y1) (x2,y2) w h -> on_hline (x1,y) (x2,y) w).
+Proof. d_and. Qed.
+
+Theorem fill_rect_h_O: forall (p1 p2 : point) (w : nat),
+         (in_rect p1 p2 w 0) -> False.
+Proof.
+intros.
+destruct p1 as [x1 y1].
+destruct p2 as [x2 y2].
+d_and.
+Qed.
+
+Definition in_rect_alt (p1 p2 : point) (w h : nat) :=
+match p1,p2 with
+| (x1,y1),(x2,y2) => y1 >= y2 /\ y1 < y2 + Z.of_nat h /\ on_hline (x1,y1) (x2,y1) w
+end.
+
+Definition in_rect_alt2 (p1 p2 : point) (w h : nat) :=
+match p1,p2 with
+| (x1,y1),(x2,y2) => x1 >= x2 /\ x1 < x2 + Z.of_nat w /\ on_vline (x1,y1) (x1,y2) h
+end.
+
+Theorem rect_def_same: forall (p1 p2 : point) (w h : nat), in_rect_alt p1 p2 w h <-> in_rect p1 p2 w h .
+Proof.
+intros.
+destruct p1 as [x1 y1].
+destruct p2 as [x2 y2].
+d_and.
+Qed.
+
+Theorem rect_def_same2: forall (p1 p2 : point) (w h : nat), in_rect_alt2 p1 p2 w h <-> in_rect p1 p2 w h .
+Proof.
+intros.
+destruct p1 as [x1 y1].
+destruct p2 as [x2 y2].
+d_and.
+Qed.
+
+  
+Lemma fill_rect_correct_aux: forall (x1 y1 x2 y2 : Z) (w h : nat), 
+      in_rect (x1,y1) (x2,y2) w h <-> on_hline (x1,y2) (x2,y2) w /\ on_vline (x2,y1) (x2,y2) h.
+Proof. d_and. Qed.
+
+
+Theorem fill_rect_correct: forall (p1 p2 : point) (w h : nat) (c : color) (st : pixelState),
+        (in_rect p1 p2 w h) ?
+        (fill_rect_rc st p2 w h c)[p1] = Some c ;
+        (fill_rect_rc st p2 w h c)[p1] = (st[p1]).
+Proof.
+destruct p1 as [x1 y1].
+destruct p2 as [x2 y2].
+intros.
+
+rewrite fill_rect_correct_aux.
+split.
+{
+  intros.
+  destruct H.
+  induction h.
+  { 
+    apply h_O_not_on_vline in H0.
+    inversion H0.
+  }
+  apply vline_correct_aux in H0.
+  destruct H0.
+  {
+    simpl.
+    edestruct hline_correct.
+    rewrite <- H1.
+    {
+      
+ d_and.
+    d_and.
+      
+
+
+generalize dependent x1.
+generalize dependent x2.
+generalize dependent st.
+induction h.
+{
+  intros.
+  rewrite fill_rect_correct_aux.
+  split.
+  {
+    intros.
+    destruct H.
+    apply h_O_not_on_vline in H0.
+    inversion H0.
+  }
+  d_and.
+}
+intros.
+split.
+{
+  rewrite fill_rect_correct_aux.
+  intros.
+  destruct H.
+  apply vline_correct_aux in H0.
+  destruct H0.
+  {
+    apply IHh.
+    rewrite fill_rect_correct_aux.
+    d_and.
+  }
+  destruct H0.
+  destruct IHh.
+  
+  destruct hline_correct with (x2,y2) (x1,y1) w c (draw_hline st (x2, y2 + Z.of_nat h) c w).
+  rewrite <- H3.
+  simpl.
+  rewrite H3.
+  {
+    
+  edestruct IHh.
+  rewrite <- H3.
+  {
+    simpl.
+    d_and.
+  simpl.
+  subst.
+  
+  edestruct hline_correct.
+  
+  d_and.
+  
+    
+
+  split.
+  intros.
+  edestruct IHh.
+  simpl.
+  rewrite <- rect_def_same in H0.
+  rewrite <- rect_def_same in H1.
+  apply H0.
+  
+
+  rewrite <- rect_def_same.
+  intros. 
+  simpl.
+  edestruct IHh.
+  destruct (y1 ?= y2 + Z.of_nat h) eqn:e.
+  {
+    
+    rewrite Z.compare_eq_iff in e.
+    rewrite H1.
+    subst.
+    unfold in_rect.
+    d_and.
+    apply 
+    d_and.
+    
+    
+    d_and.
+  apply H0.
+  rewrite <- rect_def_same.
+  
+  
+  
+  unfold in_rect_alt in H.
+  destruct H.
+  destruct H0.
+  destruct hline_correct with (x1,y1) (x2,y1) w c st.
+  rewrite <- H2.
+  {
+    rewrite <- H3.
+    {
+      d_and.
+    
+    d_and.
+  
+  unfold Z.ge in *.
+  unfold Z.lt in *.
+  destruct (y1 ?= y2) eqn:e.
+  {
+    rewrite Z.compare_eq_iff in e.
+    subst.
+    d_and.
+    
+    
+    rewrite H3.
+    {
+      d_and.
+ auto.
+    d_and.
+    
+    
+    d_and.
+    SearchAbout Eq.
+    d_and.
+  rewrite <- H2.
+  { d_and. }
+  d_and.
+  
+  
+  d_and.
+    destruct hline_correct with (x2,y2) (x2,y2 + Z.of_nat h) w c (fill_rect_rc st (x2, y2) w h c).
+  d_and.
+  rewrite <- H3.
+
+
+
+ 
+d_and.
+
+    d_and.
+    
+
+    apply fill_rect_h_O in H.
+    inversion H.
+  }
+  d_and.
+}
+split.
+{
+  intros.
+  destruct hline_correct with (x1,y1) (x2,y2 + Z.of_nat h) w c ((fill_rect_rc st (x2, y2) w h c)).
+  d_and.
+  rewrite H3.
+  { auto. }
+  
+  
+  {
+    d_and.
+    
+
+ auto. }
+  unfold on_hline.
+  d_and.
+  
+    d_and.
+  
+
+ auto. }
+  unfold in_rect in H.
+  unfold on_hline.
+  d_and.
+  
+  edestruct IHh.
+  
+  
+  rewrite H0.
+  { auto. }
+  
+  {
+    edestruct IHh.
+  
+    simpl in H.
+  
+  
+  d_and.
+  d_and.
+  
+d_and.
+ apply  
+  d_and.
+  simpl.
+  split.
+  {
+    d_and.
+    unfold in_rect in H.
+    d_and.
+  
+    
+    inversion H.
+  
+  d_and.
+  
+  unfold in_rect.
+  
 
   
  
