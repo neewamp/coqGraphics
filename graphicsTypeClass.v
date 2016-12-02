@@ -128,7 +128,7 @@ Section interp.
   match h,p with
   | O,_ => t
 (*| S h',(x,y) => draw_hline (fill_rect_rc t p w h' c) (x,y+(Z.of_nat h')) c w*)
-  | S h',(x,y) => fill_rect_rc (draw_hline t (x,y+Z.of_nat h') c w) p w h' c
+  | S h',(x,y) => draw_hline (fill_rect_rc t p w h' c) (x,y+Z.of_nat h') c w
   end.  
 
 

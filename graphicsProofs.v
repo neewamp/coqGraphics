@@ -536,36 +536,8 @@ Proof.
 destruct p1 as [x1 y1].
 destruct p2 as [x2 y2].
 intros.
-
-rewrite fill_rect_correct_aux.
-split.
-{
-  intros.
-  destruct H.
-  induction h.
-  { 
-    apply h_O_not_on_vline in H0.
-    inversion H0.
-  }
-  apply vline_correct_aux in H0.
-  destruct H0.
-  {
-    simpl.
-    edestruct hline_correct.
-    rewrite <- H1.
-    {
-      
- d_and.
-    d_and.
-      
-
-
-generalize dependent x1.
-generalize dependent x2.
-generalize dependent st.
 induction h.
 {
-  intros.
   rewrite fill_rect_correct_aux.
   split.
   {
@@ -576,183 +548,75 @@ induction h.
   }
   d_and.
 }
-intros.
+rewrite fill_rect_correct_aux.
 split.
 {
-  rewrite fill_rect_correct_aux.
   intros.
   destruct H.
+  simpl.
   apply vline_correct_aux in H0.
   destruct H0.
   {
-    apply IHh.
-    rewrite fill_rect_correct_aux.
+    edestruct hline_correct.    
+    rewrite <- H2.
+    { d_and. }
     d_and.
   }
-  destruct H0.
-  destruct IHh.
-  
-  destruct hline_correct with (x2,y2) (x1,y1) w c (draw_hline st (x2, y2 + Z.of_nat h) c w).
-  rewrite <- H3.
-  simpl.
-  rewrite H3.
-  {
-    
-  edestruct IHh.
-  rewrite <- H3.
-  {
-    simpl.
-    d_and.
-  simpl.
-  subst.
-  
   edestruct hline_correct.
-  
-  d_and.
-  
-    
-
-  split.
-  intros.
-  edestruct IHh.
-  simpl.
-  rewrite <- rect_def_same in H0.
-  rewrite <- rect_def_same in H1.
-  apply H0.
-  
-
-  rewrite <- rect_def_same.
-  intros. 
-  simpl.
-  edestruct IHh.
-  destruct (y1 ?= y2 + Z.of_nat h) eqn:e.
-  {
-    
-    rewrite Z.compare_eq_iff in e.
-    rewrite H1.
-    subst.
-    unfold in_rect.
-    d_and.
-    apply 
-    d_and.
-    
-    
-    d_and.
-  apply H0.
-  rewrite <- rect_def_same.
-  
-  
-  
-  unfold in_rect_alt in H.
-  destruct H.
-  destruct H0.
-  destruct hline_correct with (x1,y1) (x2,y1) w c st.
-  rewrite <- H2.
-  {
-    rewrite <- H3.
-    {
-      d_and.
-    
-    d_and.
-  
-  unfold Z.ge in *.
-  unfold Z.lt in *.
-  destruct (y1 ?= y2) eqn:e.
-  {
-    rewrite Z.compare_eq_iff in e.
-    subst.
-    d_and.
-    
-    
-    rewrite H3.
-    {
-      d_and.
- auto.
-    d_and.
-    
-    
-    d_and.
-    SearchAbout Eq.
-    d_and.
-  rewrite <- H2.
+  rewrite H1.
   { d_and. }
   d_and.
-  
-  
-  d_and.
-    destruct hline_correct with (x2,y2) (x2,y2 + Z.of_nat h) w c (fill_rect_rc st (x2, y2) w h c).
-  d_and.
-  rewrite <- H3.
-
-
-
- 
-d_and.
-
-    d_and.
-    
-
-    apply fill_rect_h_O in H.
-    inversion H.
-  }
-  d_and.
 }
-split.
+unfold not.
+intros.
+simpl.
+destruct IHh.
+edestruct hline_correct.
+rewrite <- H3.
 {
+  rewrite H1.
+  { auto. }
+  unfold not.
+  rewrite fill_rect_correct_aux.
   intros.
-  destruct hline_correct with (x1,y1) (x2,y2 + Z.of_nat h) w c ((fill_rect_rc st (x2, y2) w h c)).
-  d_and.
-  rewrite H3.
-  { auto. }
-  
-  
-  {
-    d_and.
-    
-
- auto. }
-  unfold on_hline.
-  d_and.
-  
-    d_and.
-  
-
- auto. }
-  unfold in_rect in H.
-  unfold on_hline.
-  d_and.
-  
-  edestruct IHh.
-  
-  
-  rewrite H0.
-  { auto. }
-  
-  {
-    edestruct IHh.
-  
-    simpl in H.
-  
-  
-  d_and.
-  d_and.
-  
-d_and.
- apply  
-  d_and.
-  simpl.
+  destruct H4.
+  apply H.
   split.
-  {
-    d_and.
-    unfold in_rect in H.
-    d_and.
-  
-    
-    inversion H.
-  
-  d_and.
-  
-  unfold in_rect.
+  { apply H4. }
+  simpl.
+  simpl in H5.
+  destruct H5.
+  destruct H6.
+  split.
+  { auto. }
+  split.
+  { apply H6. }
+  rewrite Zpos_P_of_succ_nat.
+  eapply Z.lt_trans.
+  { apply H7. }
+  unfold Z.lt.
+  rewrite Z.add_compare_mono_l.
+  apply Z.lt_succ_diag_r.
+}
+unfold not.
+intros.
+ apply H.
+split.
+{ d_and. }
+simpl.
+split.
+{ auto. }
+simpl in H4.
+destruct H4.
+destruct H5.
+split.
+{ d_and. }
+subst.
+unfold  Z.lt.
+rewrite Z.add_compare_mono_l.
+rewrite Zpos_P_of_succ_nat.
+apply Z.lt_succ_diag_r.
+Qed.
   
 
   
