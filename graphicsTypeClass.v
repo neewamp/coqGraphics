@@ -9,7 +9,6 @@
 Require Import PArith String FMaps FMapAVL ExtrOcamlString.
 Require Import Pnat QArith.
 
-
 Require Export QArith.
 (* We probably need a way to express background and forground idk maybe something in the pixel type?*)
 
@@ -56,16 +55,10 @@ Print p.
 Definition p1 := pix.add (2,2) Blue p.
 Compute pix.find (1,1) p1.
 
-(* Maybe we need a state monad I don't 
-   know where it would help currently
-   Maybe when we define the semantics we just make it a function/
-   relation that changes the state*)
-(*Function interp (s : state) (exp : g_com) : state*)
 
 (* We need two different functions like ocaml stuff and stuff that is in coq and a type class that could take and differentiate the two.*)
-
-
 Inductive g_com : Type :=
+| draw_pix : point -> color -> g_com
 | open_graph : point -> g_com
 | resize_window : point  -> g_com
 (* | close_graph : unit -> unit -> g_com *)
@@ -142,6 +135,7 @@ Section interp.
                           seems like a david thing*)
   Fixpoint interp (t : T) (e : g_com) : T :=
     match e with
+    | draw_pix p c => draw_pixel t p c
     | open_graph s_size => update_state t s_size
     | resize_window s_size => update_state t s_size 
     | lineto p1 p2 c => interp_draw_line t c p1 p2
@@ -165,7 +159,7 @@ Section interp.
     *)
     | seq g1 g2 => let st := (interp t g1) in (interp st g1)
     end.
-
+  
   Definition run (e : g_com) : T :=
     interp (init_state tt) e.
 End interp.

@@ -7,7 +7,7 @@ n         we defined above *)
 
 (* Example very tentatively modelling extraction into ocaml*)
 
-Axiom OGState : Type. (* OCaml graphics state *)(* Maybe makes this unit*)
+Axiom OGState : Type. (* OCaml graphics state *)(* Maybe make this unit*)
 Axiom initial_OGState : OGState.
 
 (* OCaml graphics operations *)
@@ -55,9 +55,11 @@ Extract Constant ocaml_draw_pixel =>
      in 
      Graphics.set_color c;
      Graphics.plot """" (int_of_pos p))".
+Open Scope Z_scope.
 
+Definition prog := draw_rect (1,2) (2,3) .
 
-Definition t : OGState := interp (init_state tt) prog1.
+Definition t : OGState := interp (init_state tt) prog.
 
 (* Recursive Extraction t prog1. *)
 (* Extraction "test.ml" t. *)
