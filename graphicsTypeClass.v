@@ -10,6 +10,8 @@ Require Import PArith String FMaps FMapAVL ExtrOcamlString.
 Require Import Pnat QArith.
 
 Require Export QArith.
+
+
 (* We probably need a way to express background and forground idk maybe something in the pixel type?*)
 
 (*Inductive color: Type :=
@@ -18,11 +20,26 @@ Require Export QArith.
 | Green : color
 | White : color. *)
 
+
+Definition rgb : Type := (Z * Z * Z).
+
+Definition toRGB (c : Z) : rgb :=
+((Zmod c 256),(Zmod (Zdiv c 256) 256),(Zmod (Zdiv c 65536) 256)).
+
+Definition fromRGB(c : rgb) : Z :=
+match c with
+| (r,g,b) => r + (g * 256) + (b * 65536)
+end.
+
+
+
 Definition color := Z.
 Definition Red := Zpos 1.
 Definition Blue := Zpos 1.
 Definition Green := Zpos 1.
 Definition White := Zpos 1.
+
+
 
 
 (* The type of a single pixel's location*)
