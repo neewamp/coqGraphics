@@ -1,14 +1,5 @@
 Require Import ZArith String FMaps FMapAVL.
 
-(* We probably need a way to express background and forground idk maybe something in the pixel type?*)
-
-(*Inductive color: Type :=
-| Red : color
-| Blue : color
-| Green : color
-| White : color. *)
-
-
 Definition rgb : Type := (Z * Z * Z).
 
 Definition toRGB (c : Z) : rgb :=
@@ -88,26 +79,30 @@ Class graphics_prims (T :Type) :=
       draw_pixel : T -> point -> color -> T;
   }.
 
-Definition distance (p1 p2 : point) : nat :=
+Definition distance (p1 p2 : point) : Z :=
   let dx := (fst p2) - (fst p1) in
   let dy := (snd p2) - (snd p1) in
-  Z.to_nat (Z.sqrt ((Z.square dx) + (Z.square dy))).
+   (Z.sqrt ((Z.square dx) + (Z.square dy))).
+Import ListNotations.
+
+Definition disVec (p1 p2 : point) := 
+  ((fst p2) - (fst p1), (snd p2) - (snd p1)).
 
 Section interp.
   
-  (* Notation "a # b" := (Qmake a b) (at level 55, no associativity) : Q_scope. *)
   Context {T : Type} `{graphics_prims T}.
   
-  Fixpoint interpolate (t : T) (n : nat)
-           (p1 p2 V: point) (D : nat) c : T :=
-    match n with
+  Fixpoint interpolate (t : T) (i : nat)
+           (p1 p2 V: point) (num_points : Z) c : T :=
+    match i with
     | O => draw_pixel t p1 c
     | 1%nat => draw_pixel t p1 c
-    | S n' => let p1' := ( (fst p1) + (fst V) * (Z.of_nat (Nat.div n D )),                  (snd p1) + (snd V) * (Z.of_nat (Nat.div n D)))
+    | S i' => let p1' :=
+                  (((fst p1) + (fst V) * (Z.of_nat i) / num_points),
+                  ((snd p1) + (snd V) * (Z.of_nat i) / num_points))
     in
-      draw_pixel (interpolate t n' p1' p2 V D c) p1 c 
+      draw_pixel (interpolate t i' p1 p2 V num_points c) p1' c 
     end.
-  
 
   Fixpoint draw_vline (t : T) (p : point) (c : color) (h : nat) : T :=
     match h,p with
@@ -129,20 +124,18 @@ Section interp.
   end.  
 
 
-(* this needs a couple things and then maybe it will work*)
   Definition interp_draw_line (t : T) (c : color)
              (p1 p2 : point) : T :=
-    interpolate t ((distance p1 p2) - 1) p1 p2 ((fst p2) - (fst p1), (snd p2) - (snd p1) ) (distance p1 p2) c.
+    interpolate t (Z.to_nat (distance p1 p2) - 1) p1 p2 ((fst p2) - (fst p1), (snd p2) - (snd p1) ) (distance p1 p2) c.
   
 
-    (* draw_pixel t p1 c.  need to make this actually draw a line 
-                          seems like a david thing*)
   Fixpoint interp (t : T) (e : g_com) : T :=
     match e with
     | draw_pix p c => draw_pixel t p c
     | open_graph s_size => update_state t s_size
     | resize_window s_size => update_state t s_size 
-    | lineto p1 p2 c => interp_draw_line t c p1 p2
+    | lineto p1 p2 c => let st := interp_draw_line t c p1 p2 in 
+      let st' := draw_pixel st p1 c in  draw_pixel st' p2 c
     | draw_rect (x,y) (w,h) c =>
         let w' := Z.to_nat w in
         let h' := Z.to_nat h in

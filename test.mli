@@ -15,6 +15,8 @@ type comparison =
 | Lt
 | Gt
 
+val compOpp : comparison -> comparison
+
 val add : nat -> nat -> nat
 
 val sub : nat -> nat -> nat
@@ -28,13 +30,6 @@ type z =
 | Z0
 | Zpos of positive
 | Zneg of positive
-
-module Nat :
- sig
-  val divmod : nat -> nat -> nat -> nat -> nat*nat
-
-  val div : nat -> nat -> nat
- end
 
 module Pos :
  sig
@@ -114,9 +109,21 @@ module Z :
 
   val square : z -> z
 
+  val compare : z -> z -> comparison
+
+  val leb : z -> z -> bool
+
+  val ltb : z -> z -> bool
+
   val to_nat : z -> nat
 
   val of_nat : nat -> z
+
+  val pos_div_eucl : positive -> z -> z*z
+
+  val div_eucl : z -> z -> z*z
+
+  val div : z -> z -> z
 
   val sqrt : z -> z
  end
@@ -150,10 +157,10 @@ val update_state : 'a1 graphics_prims -> 'a1 -> point -> 'a1
 
 val draw_pixel : 'a1 graphics_prims -> 'a1 -> point -> color -> 'a1
 
-val distance : point -> point -> nat
+val distance : point -> point -> z
 
 val interpolate :
-  'a1 graphics_prims -> 'a1 -> nat -> point -> point -> point -> nat ->
+  'a1 graphics_prims -> 'a1 -> nat -> point -> point -> point -> z ->
   color -> 'a1
 
 val draw_vline :

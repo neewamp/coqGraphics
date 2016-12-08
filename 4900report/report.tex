@@ -1,0 +1,56 @@
+\documentclass{llncs}
+
+\usepackage{listings}
+
+\lstdefinelanguage{Coq}{
+  ,morekeywords={match,end,Definition,Inductive,Lemma,Record,
+    Variable,Section,case,of,if,then,else,is,let,in,do,return,with}%
+  ,keywordstyle=\bfseries
+  ,basicstyle=\sffamily
+  ,columns=fullflexible
+  ,numberstyle=\tiny
+  ,escapeinside={@}{@}
+  ,literate=
+  {<-}{{$\leftarrow\;$}}1
+  {=>}{{$\rightarrow\;$}}1
+  {->}{{$\rightarrow\;$}}1
+  {<->}{{$\leftrightarrow\;$}}1
+  {<==}{{$\leq\;$}}1
+  {\\/}{{$\vee\;$}}1
+  {/\\}{{$\land\;$}}1
+}
+\lstset{language=Coq}
+
+\begin{document}
+
+\title{Project Title}
+
+\author{author1 \and author2}
+\institute{Ohio University, Athens, OH 45701}
+
+\maketitle
+
+\section{Introduction}
+
+\subsection{Subsection1} This is a subsection.
+
+\subsection{Subsection2} This is a second subsection.
+
+This is a citation.~\cite{gennaro2010non}
+
+This is a chunk of code:
+\begin{lstlisting}
+  Definition f(x : nat) := S x.
+  Definition g(y : nat) := f y.
+\end{lstlisting}
+
+This is inline code \lstinline|Fixpoint f(x : nat) := ...| typeset within a line of text.
+
+\paragraph{Para1.} This is a paragraph, or subsubsection.
+
+\section{Conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

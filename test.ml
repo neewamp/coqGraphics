@@ -21,6 +21,13 @@ type comparison =
 | Lt
 | Gt
 
+(** val compOpp : comparison -> comparison **)
+
+let compOpp = function
+| Eq -> Eq
+| Lt -> Gt
+| Gt -> Lt
+
 module Coq__1 = struct
  (** val add : nat -> nat -> nat **)
  let rec add n m =
@@ -50,25 +57,6 @@ type z =
 | Z0
 | Zpos of positive
 | Zneg of positive
-
-module Nat =
- struct
-  (** val divmod : nat -> nat -> nat -> nat -> nat*nat **)
-
-  let rec divmod x y q u =
-    match x with
-    | O -> q,u
-    | S x' ->
-      (match u with
-       | O -> divmod x' y (S q) y
-       | S u' -> divmod x' y q u')
-
-  (** val div : nat -> nat -> nat **)
-
-  let div x y = match y with
-  | O -> y
-  | S y' -> fst (divmod x y' O y')
- end
 
 module Pos =
  struct
@@ -394,6 +382,38 @@ module Z =
   | Zpos p -> Zpos (Coq_Pos.square p)
   | Zneg p -> Zpos (Coq_Pos.square p)
 
+  (** val compare : z -> z -> comparison **)
+
+  let compare x y =
+    match x with
+    | Z0 ->
+      (match y with
+       | Z0 -> Eq
+       | Zpos _ -> Lt
+       | Zneg _ -> Gt)
+    | Zpos x' ->
+      (match y with
+       | Zpos y' -> Coq_Pos.compare x' y'
+       | _ -> Gt)
+    | Zneg x' ->
+      (match y with
+       | Zneg y' -> compOpp (Coq_Pos.compare x' y')
+       | _ -> Lt)
+
+  (** val leb : z -> z -> bool **)
+
+  let leb x y =
+    match compare x y with
+    | Gt -> False
+    | _ -> True
+
+  (** val ltb : z -> z -> bool **)
+
+  let ltb x y =
+    match compare x y with
+    | Lt -> True
+    | _ -> False
+
   (** val to_nat : z -> nat **)
 
   let to_nat = function
@@ -405,6 +425,56 @@ module Z =
   let of_nat = function
   | O -> Z0
   | S n0 -> Zpos (Coq_Pos.of_succ_nat n0)
+
+  (** val pos_div_eucl : positive -> z -> z*z **)
+
+  let rec pos_div_eucl a b =
+    match a with
+    | XI a' ->
+      let q,r = pos_div_eucl a' b in
+      let r' = add (mul (Zpos (XO XH)) r) (Zpos XH) in
+      (match ltb r' b with
+       | True -> (mul (Zpos (XO XH)) q),r'
+       | False -> (add (mul (Zpos (XO XH)) q) (Zpos XH)),(sub r' b))
+    | XO a' ->
+      let q,r = pos_div_eucl a' b in
+      let r' = mul (Zpos (XO XH)) r in
+      (match ltb r' b with
+       | True -> (mul (Zpos (XO XH)) q),r'
+       | False -> (add (mul (Zpos (XO XH)) q) (Zpos XH)),(sub r' b))
+    | XH ->
+      (match leb (Zpos (XO XH)) b with
+       | True -> Z0,(Zpos XH)
+       | False -> (Zpos XH),Z0)
+
+  (** val div_eucl : z -> z -> z*z **)
+
+  let div_eucl a b =
+    match a with
+    | Z0 -> Z0,Z0
+    | Zpos a' ->
+      (match b with
+       | Z0 -> Z0,Z0
+       | Zpos _ -> pos_div_eucl a' b
+       | Zneg b' ->
+         let q,r = pos_div_eucl a' (Zpos b') in
+         (match r with
+          | Z0 -> (opp q),Z0
+          | _ -> (opp (add q (Zpos XH))),(add b r)))
+    | Zneg a' ->
+      (match b with
+       | Z0 -> Z0,Z0
+       | Zpos _ ->
+         let q,r = pos_div_eucl a' b in
+         (match r with
+          | Z0 -> (opp q),Z0
+          | _ -> (opp (add q (Zpos XH))),(sub b r))
+       | Zneg b' -> let q,r = pos_div_eucl a' (Zpos b') in q,(opp r))
+
+  (** val div : z -> z -> z **)
+
+  let div a b =
+    let q,_ = div_eucl a b in q
 
   (** val sqrt : z -> z **)
 
@@ -461,29 +531,36 @@ let update_state x = x.update_state
 
 let draw_pixel x = x.draw_pixel
 
-(** val distance : point -> point -> nat **)
+(** val distance : point -> point -> z **)
 
 let distance p1 p2 =
   let dx = Z.sub (fst p2) (fst p1) in
   let dy = Z.sub (snd p2) (snd p1) in
-  Z.to_nat (Z.sqrt (Z.add (Z.square dx) (Z.square dy)))
+  Z.sqrt (Z.add (Z.square dx) (Z.square dy))
 
 (** val interpolate :
-    'a1 graphics_prims -> 'a1 -> nat -> point -> point -> point -> nat
-    -> color -> 'a1 **)
+    'a1 graphics_prims -> 'a1 -> nat -> point -> point -> point -> z ->
+    color -> 'a1 **)
 
-let rec interpolate h t0 n p1 p2 v d c =
-  match n with
+let rec interpolate h t0 i p1 p2 v num_points c =
+  match i with
   | O -> h.draw_pixel t0 p1 c
-  | S n' ->
-    (match n' with
+  | S i' ->
+    (match i' with
      | O -> h.draw_pixel t0 p1 c
      | S _ ->
        let p1' =
-         (Z.add (fst p1) (Z.mul (fst v) (Z.of_nat (Nat.div n d)))),
-         (Z.add (snd p1) (Z.mul (snd v) (Z.of_nat (Nat.div n d))))
+         (Z.add (fst p1)
+           (Z.div (Z.mul (fst v) (Z.of_nat i)) num_points)),(Z.add
+                                                              (snd p1)
+                                                              (Z.div
+                                                              (Z.mul
+                                                              (snd v)
+                                                              (Z.of_nat
+                                                              i))
+                                                              num_points))
        in
-       h.draw_pixel (interpolate h t0 n' p1' p2 v d c) p1 c)
+       h.draw_pixel (interpolate h t0 i' p1 p2 v num_points c) p1' c)
 
 (** val draw_vline :
     'a1 graphics_prims -> 'a1 -> point -> color -> nat -> 'a1 **)
@@ -518,7 +595,7 @@ let rec fill_rect_rc h t0 p w h0 c =
     'a1 graphics_prims -> 'a1 -> color -> point -> point -> 'a1 **)
 
 let interp_draw_line h t0 c p1 p2 =
-  interpolate h t0 (sub (distance p1 p2) (S O)) p1 p2
+  interpolate h t0 (sub (Z.to_nat (distance p1 p2)) (S O)) p1 p2
     ((Z.sub (fst p2) (fst p1)),(Z.sub (snd p2) (snd p1)))
     (distance p1 p2) c
 
@@ -528,7 +605,9 @@ let rec interp h t0 = function
 | Draw_pix (p, c) -> h.draw_pixel t0 p c
 | Open_graph s_size -> h.update_state t0 s_size
 | Resize_window s_size -> h.update_state t0 s_size
-| Lineto (p1, p2, c) -> interp_draw_line h t0 c p1 p2
+| Lineto (p1, p2, c) ->
+  let st = interp_draw_line h t0 c p1 p2 in
+  let st' = h.draw_pixel st p1 c in h.draw_pixel st' p2 c
 | Draw_rect (p, p0, c) ->
   let x,y = p in
   let w,h0 = p0 in
@@ -567,8 +646,9 @@ let oGState_graphics_prims =
 
 let prog =
   Lineto (((Zpos (XO (XO (XI (XO (XO (XI XH))))))),(Zpos (XO (XO (XO
-    (XI (XO (XO (XI XH))))))))), ((Zpos (XO (XO (XO (XO (XI (XO (XO (XI
-    XH))))))))),(Zpos (XO (XO (XO (XI (XO (XO (XI XH))))))))), red)
+    (XI (XO (XO (XI XH))))))))), ((Zpos (XO (XO (XI (XO (XO (XI (XO (XI
+    (XO (XI XH))))))))))),(Zpos (XO (XO (XI (XO (XO (XO (XO (XI (XI
+    XH))))))))))), red)
 
 (** val t : oGState **)
 
