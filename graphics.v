@@ -59,8 +59,11 @@ Extract Constant ocaml_draw_pixel =>
 ".
 
 Open Scope Z_scope.
+Definition prog := lineto (100,200) (400,200) Red.
 
-Definition prog := draw_rect (100,0) (300,1000) Black;;
+
+
+Definition prog1 := draw_rect (100,0) (300,1000) Black;;
                              draw_rect (400,350) (300,200) Red;;
                              draw_rect  (700,0) (300, 1000) Black;;
                              draw_rect (1200,0) (200,500) Blue;;
