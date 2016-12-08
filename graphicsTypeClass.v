@@ -58,11 +58,11 @@ Inductive g_com : Type :=
 | resize_window : point  -> g_com
 (* | close_graph : unit -> unit -> g_com *)
 | lineto : point -> point -> color -> g_com
+(* | draw_circle : point -> Z -> g_com *)
 (* | plots : list (Z * Z) -> unit -> g_com *)
 (* | moveto : point -> unit -> g_com *)
-(* | lineto : point -> g_com *)
-(* Rec with the bottom left point followed by the top right.*)          
 | draw_rect : point -> point -> color -> g_com
+(* Rec with the bottom left point followed by the top right.*)          
 | fill_rect : point -> point -> color -> g_com
 | seq : g_com -> g_com -> g_com.
 
@@ -83,14 +83,44 @@ Definition distance (p1 p2 : point) : Z :=
   let dx := (fst p2) - (fst p1) in
   let dy := (snd p2) - (snd p1) in
    (Z.sqrt ((Z.square dx) + (Z.square dy))).
-Import ListNotations.
 
 Definition disVec (p1 p2 : point) := 
   ((fst p2) - (fst p1), (snd p2) - (snd p1)).
 
 Section interp.
-  
+
   Context {T : Type} `{graphics_prims T}.
+
+  (* Fixpoint draw_circle_aux (t : T) (p1 : point) *)
+  (*          (x : Z) (y : Z) (err : Z) :=  *)
+  (*   match  *)
+(* This is a integer function to draw circles.  It just needs to be 
+   recursive. *)
+(* void drawcircle(int x0, int y0, int radius) *)
+(* {    int x = radius; *)
+(*     int y = 0; *)
+(*     int err = 0; *)
+(*     while (x >= y) *)
+(*     { *)
+(*         putpixel(x0 + x, y0 + y); *)
+(*         putpixel(x0 + y, y0 + x); *)
+(*         putpixel(x0 - y, y0 + x); *)
+(*         putpixel(x0 - x, y0 + y); *)
+(*         putpixel(x0 - x, y0 - y); *)
+(*         putpixel(x0 - y, y0 - x); *)
+(*         putpixel(x0 + y, y0 - x); *)
+(*         putpixel(x0 + x, y0 - y); *)
+
+(*         y += 1; *)
+(*         err += 1 + 2*y; *)
+(*         if (2*(err-x) + 1 > 0) *)
+(*         { *)
+(*             x -= 1; *)
+(*             err += 1 - 2*x; *)
+
+(*         } *)
+(*     } *)
+(* } *)
   
   Fixpoint interpolate (t : T) (i : nat)
            (p1 p2 V: point) (num_points : Z) c : T :=

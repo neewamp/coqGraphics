@@ -3,6 +3,7 @@
 *.v.d
 .*.aux
 *.a
+*.ml*
 *.cma
 *.cmi
 *.cmo
