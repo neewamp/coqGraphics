@@ -1,12 +1,16 @@
-# all :
-# 	ocamlc -i export.ml > export.mli
-# 	ocamlc -c export.mli
-# 	ocamlopt export.ml	If you need the mli file
-
 all test.ml:
 	echo ";;read_line();;" >> test.ml
 	ocamlc -c test.mli
-	ocamlc.opt -o hi graphics.cma test.ml
+	ocamlmktop -o hi graphics.cma test.ml
+
+coq:
+	coqc graphicsTypeClass.v
+	coqc graphics.v
+	coqc pixelState.v
+	coqc graphicsProofs.v
+
+
+
 
 clean:
 	-rm sample.cmi
@@ -19,3 +23,4 @@ clean:
 coqclean:
 	-rm *.vo
 	-rm *.glob
+	-rm *v.d

@@ -1,16 +1,4 @@
-(* To DO: 1) Finish the draw line function 
-          in the section for interp on line 89
-          2) Think up different specifications that would be useful*)
-(*           An example could be a specification that shows that draw
-             rectangle actually draws a rectangle*)
-
-(* Let me know if you have any questions *)
-
-Require Import PArith String FMaps FMapAVL ExtrOcamlString.
-Require Import Pnat QArith.
-
-Require Export QArith.
-
+Require Import ZArith String FMaps FMapAVL.
 
 (* We probably need a way to express background and forground idk maybe something in the pixel type?*)
 
@@ -35,8 +23,9 @@ end.
 Open Scope Z_scope.
 
 Definition color := Z.
-Definition Red := fromRGB (255,0,0).
-Definition Blue := fromRGB (0,0,255).
+Definition Black := fromRGB(0,0,0).
+Definition Red := fromRGB (0,0,255).
+Definition Blue := fromRGB (255,0,0).
 Definition Green := fromRGB (0,255,0).
 Definition White := fromRGB(255,255,255).
 
@@ -52,7 +41,6 @@ Definition point : Type := (Z * Z).
 Module pix :=  FMapAVL.Make pixel_l.
 
 Definition pixtype := pix.t.
-Print pix.
 (*The state is a map and a screen size*)
 
 Open Scope Z_scope.
@@ -68,10 +56,8 @@ Next Obligation.
 
 
 Program Definition p := update (1,2) Red emptyST.
-Print p.
 
 Definition p1 := pix.add (2,2) Blue p.
-Compute pix.find (1,1) p1.
 
 
 (* We need two different functions like ocaml stuff and stuff that is in coq and a type class that could take and differentiate the two.*)
@@ -175,7 +161,7 @@ Section interp.
         t4
       end
     *)
-    | seq g1 g2 => let st := (interp t g1) in (interp st g1)
+    | seq g1 g2 => let st := (interp t g1) in (interp st g2)
     end.
   
   Definition run (e : g_com) : T :=

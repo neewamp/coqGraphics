@@ -1,4 +1,4 @@
-Require Export pixelState graphicsTypeClass.
+Require Export pixelState graphicsTypeClass ZArith.
 Module pix_prop := FMapFacts.Properties pix.
 
 
@@ -97,7 +97,6 @@ Notation "s [ p ]" := (pix.find p (screen_state s)) (at level 97).
 
 (* Lemma vline_correct' : forall (p1 p2 :  *)
 
-Print OrderedTypeEx.
 
 Import FMapAVL.
 Import FMaps.
@@ -617,13 +616,6 @@ rewrite Z.add_compare_mono_l.
 rewrite Zpos_P_of_succ_nat.
 apply Z.lt_succ_diag_r.
 Qed.
-  
-
-  
- 
-
-
-Definition in_rect         
          
       
   

@@ -1,13 +1,7 @@
 Require Import graphicsTypeClass ExtrOcamlString.
-(*example Instances We would use the State that 
-n         we defined above *)
 
+Definition OGState := unit.
 
-
-
-(* Example very tentatively modelling extraction into ocaml*)
-
-Definition OGState := unit. (* OCaml graphics state *)(* Maybe make this unit*)
 Axiom initial_OGState : OGState.
 
 (* OCaml graphics operations *)
@@ -66,54 +60,16 @@ Extract Constant ocaml_draw_pixel =>
 
 Open Scope Z_scope.
 
-Definition prog := fill_rect (100,0) (300,400) Red;;
-                             fill_rect (1000,1000) (1500,1500) Red.
+Definition prog := draw_rect (100,0) (300,1000) Black;;
+                             draw_rect (400,350) (300,200) Red;;
+                             draw_rect  (700,0) (300, 1000) Black;;
+                             draw_rect (1200,0) (200,500) Blue;;
+                             draw_rect (1250,700) (100,100) Green.
 
 Definition t : OGState := interp (init_state tt) prog.
 Extract Inductive prod => "(*)"  [ "(,)" ].
 
-Recursive Extraction t.
 Extraction "test.ml" t.
-
-
-
-
-  (* "(fun _ p c ->   *)
-  (*    let rec int_of_pos p =  *)
-  (*    (match p with *)
-  (*    |Zpos p'' ->  *)
-  (*      (match p'' with  *)
-  (*        | XH -> 1 *)
-  (*        | XO p' -> 2 * int_of_pos p' *)
-  (*        | XI p' -> (2 * int_of_pos p') + 1) *)
-  (*    |Zneg p'' ->  *)
-  (*      (match p'' with  *)
-  (*        | XH -> 1 *)
-  (*        | XO p' -> 2 * int_of_pos p' *)
-  (*        | XI p' -> (2 * int_of_pos p') + 1)) *)
-  (*    in  *)
-  (*    Graphics.set_color c; *)
-  (*    Graphics.plot """" (int_of_pos p))". *)
-
-
-
-
-
-
-
-
-
-
-
-(* Extract Constant camel_string "'x'"  => "let camel_string (s: char list) : string = *)
-(* let r = String.create (List.length s) in *)
-(* let rec fill pos = function *)
-(* | [] -> r *)
-(* | c :: s -> r.[pos] <- c; fill (pos + 1) s *)
-(* in fill 0 s". *)
-
-
-(* Extract Inductive g_com => g_com [ "open_graph" "resize_window" "close_graph" "plot" "plots" "moveto" "lineto" "draw_rect" " "]. *)
 
 
 

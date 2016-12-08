@@ -33,5 +33,3 @@ Fixpoint toListPair (l : list (pix.key * color)) : list (pix.key):=
 
 Definition hi := (pix.elements (screen_state (interp (init_state tt) prog1))).
 
-Compute distance (1,2) (1, 4).
-Compute toListPair hi.
