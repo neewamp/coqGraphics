@@ -7,7 +7,7 @@ n         we defined above *)
 
 (* Example very tentatively modelling extraction into ocaml*)
 
-Axiom OGState : Type. (* OCaml graphics state *)(* Maybe make this unit*)
+Definition OGState := unit. (* OCaml graphics state *)(* Maybe make this unit*)
 Axiom initial_OGState : OGState.
 
 (* OCaml graphics operations *)
@@ -41,28 +41,60 @@ Definition buf : string :=
   "                  ...             " ++ String newline EmptyString ++
   "                   .              ".
 
-Extract Constant OGState => "unit".
+Extract Inductive unit => "unit" [ "()" ].
 Extract Constant initial_OGState => "()".
 Extract Constant ocaml_graphics_init =>
-  "(fun _ -> Graphics.open_graph ())".
+  "(fun _ -> Graphics.open_graph "" 1920x1080"")".
+
 Extract Constant ocaml_draw_pixel =>
-  "(fun _ p c ->  
-     let rec int_of_pos p = 
-       (match p with 
-         | XH -> 1
-         | XO p' -> 2 * int_of_pos p'
-         | XI p' -> (2 * int_of_pos p') + 1)
-     in 
-     Graphics.set_color c;
-     Graphics.plot """" (int_of_pos p))".
+"  (fun _ (p : point) c ->
+    let rec int_of_z po =
+  (match po with
+   |Z0 -> 0
+   |Zpos p'' ->
+     (match p'' with
+      | XH -> 1
+      | XO p' -> 2 * int_of_z (Zpos p')
+      | XI p' -> (2 * int_of_z (Zpos p')) + 1)
+   |Zneg p'' ->
+     (match p'' with
+      | XH -> -1
+      | XO p' -> 2 * int_of_z (Zneg p')
+      | XI p' -> (2 * int_of_z (Zneg p')) + 1))
+      in   Graphics.plot (int_of_z (fst p)) (int_of_z (snd p)); Graphics.set_color (int_of_z c));;
+".
+
 Open Scope Z_scope.
 
-Definition prog := draw_rect (1,2) (2,3) .
+Definition prog := fill_rect (100,0) (300,400) Red;;
+                             fill_rect (1000,1000) (1500,1500) Red.
 
 Definition t : OGState := interp (init_state tt) prog.
+Extract Inductive prod => "(*)"  [ "(,)" ].
 
-(* Recursive Extraction t prog1. *)
-(* Extraction "test.ml" t. *)
+Recursive Extraction t.
+Extraction "test.ml" t.
+
+
+
+
+  (* "(fun _ p c ->   *)
+  (*    let rec int_of_pos p =  *)
+  (*    (match p with *)
+  (*    |Zpos p'' ->  *)
+  (*      (match p'' with  *)
+  (*        | XH -> 1 *)
+  (*        | XO p' -> 2 * int_of_pos p' *)
+  (*        | XI p' -> (2 * int_of_pos p') + 1) *)
+  (*    |Zneg p'' ->  *)
+  (*      (match p'' with  *)
+  (*        | XH -> 1 *)
+  (*        | XO p' -> 2 * int_of_pos p' *)
+  (*        | XI p' -> (2 * int_of_pos p') + 1)) *)
+  (*    in  *)
+  (*    Graphics.set_color c; *)
+  (*    Graphics.plot """" (int_of_pos p))". *)
+
 
 
 
