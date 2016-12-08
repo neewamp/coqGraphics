@@ -32,12 +32,13 @@ match c with
 end.
 
 
+Open Scope Z_scope.
 
 Definition color := Z.
-Definition Red := Zpos 1.
-Definition Blue := Zpos 1.
-Definition Green := Zpos 1.
-Definition White := Zpos 1.
+Definition Red := fromRGB (255,0,0).
+Definition Blue := fromRGB (0,0,255).
+Definition Green := fromRGB (0,255,0).
+Definition White := fromRGB(255,255,255).
 
 
 
