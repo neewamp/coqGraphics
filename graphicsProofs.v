@@ -1,4 +1,6 @@
-Require Export pixelState graphicsTypeClass ZArith.
+Require Import graphicsTypeClass ZArith.
+Require Export pixelState.
+
 Module pix_prop := FMapFacts.Properties pix.
 
 
@@ -31,9 +33,6 @@ Ltac d_all n :=
                                 try d_all 0
               | H :~ _ |-  _ => unfold not in H; simpl in *; intros;
                                try solve_by_inverts 1; auto; try d_all 0
-              | [H : ?T ?P -> ?Q, H' : ?P |- _ ] => 
-                assert (1 = 1);
-                   apply H in H'; auto; try d_all 0
               | _ => auto; try solve_by_inverts 1; try d_all 1
               end)
     | 1 =>  match goal with
@@ -51,27 +50,22 @@ Ltac d_or :=
 Ltac uncomp := 
  d_all 2.
 Open Scope Z_scope.
+Require Import Setoid.
 
 Theorem draw_order_pixel: forall (p1 p2 : point) (c1 c2 : color)
     (st : pixelState), p1 <> p2 -> 
-    pix.Equal  (screen_state (draw_pixel (draw_pixel st p1 c1) p2 c2))
-               (screen_state (draw_pixel (draw_pixel st p2 c2) p1 c1)).
+                       eq
+        (interp st  ((draw_pix p2 c2);; (draw_pix p1 c1)))
+        (interp st ((draw_pix p1 c1);;(draw_pix p2 c2))).
 Proof.
   intros.
   simpl.
-  unfold update.
-  unfold pix.Equal.
-  intros .
-  do 4 rewrite pix_prop.F.add_o.
-  unfold not in H.
-  case_eq (pix.E.eq_dec p2 y);
-  case_eq (pix.E.eq_dec p1 y);
-  d_and.
-  destruct p1,p2,y.
-  simpl in *.
-  subst.
-  destruct H; auto.
+  unfold eq.
+  apply pix_ok.
+  auto.
 Qed.
+
+
 
 
 Definition on_vline (p1 p2 : point) (h : nat) :=
@@ -618,6 +612,17 @@ apply Z.lt_succ_diag_r.
 Qed.
          
       
-  
+Definition Distance (d : Z)  (p1 p2 : point) :=
+  let dx := fst p2 - fst p1 in
+  let dy := snd p2 - snd p1 in d = Z.sqrt (Z.square dx + Z.square dy).
+
+(*Define a spec about interpolation*) 
+
+
+
+
+
+
+
 
 

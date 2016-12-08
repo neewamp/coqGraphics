@@ -75,8 +75,8 @@ module Coq_Pos :
   val leb : positive -> positive -> bool
 
   val sqrtrem_step :
-    (positive -> positive) -> (positive -> positive) -> (positive*mask)
-    -> positive*mask
+    (positive -> positive) -> (positive -> positive) -> (positive*mask) ->
+    positive*mask
 
   val sqrtrem : positive -> positive*mask
 
@@ -160,14 +160,12 @@ val draw_pixel : 'a1 graphics_prims -> 'a1 -> point -> color -> 'a1
 val distance : point -> point -> z
 
 val interpolate :
-  'a1 graphics_prims -> 'a1 -> nat -> point -> point -> point -> z ->
-  color -> 'a1
+  'a1 graphics_prims -> 'a1 -> nat -> point -> point -> point -> z -> color
+  -> 'a1
 
-val draw_vline :
-  'a1 graphics_prims -> 'a1 -> point -> color -> nat -> 'a1
+val draw_vline : 'a1 graphics_prims -> 'a1 -> point -> color -> nat -> 'a1
 
-val draw_hline :
-  'a1 graphics_prims -> 'a1 -> point -> color -> nat -> 'a1
+val draw_hline : 'a1 graphics_prims -> 'a1 -> point -> color -> nat -> 'a1
 
 val fill_rect_rc :
   'a1 graphics_prims -> 'a1 -> point -> nat -> nat -> color -> 'a1
@@ -183,7 +181,7 @@ val ocaml_graphics_init : unit -> oGState
 
 val ocaml_update_state : oGState -> point -> oGState
 
-val ocaml_draw_pixel : oGState -> point -> color -> oGState
+val draw_pixel0 : oGState -> point -> color -> oGState
 
 val oGState_graphics_prims : oGState graphics_prims
 

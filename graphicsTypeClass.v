@@ -70,6 +70,7 @@ Notation "a ;; b" := (seq a b) (at level 50, left associativity).
 
 (*These are the basic 
   primitives that we build everything from*)
+
 Class graphics_prims (T :Type) :=
   mkGraphicsPrims
     {
@@ -77,7 +78,16 @@ Class graphics_prims (T :Type) :=
       update_state : T -> point -> T;
       (*Add an update color*)
       draw_pixel : T -> point -> color -> T;
+      eq : T -> T -> Prop;
+      eq_refl : forall x : T, eq x x;
+      eq_sym : forall x y : T, eq x  y -> eq y x;
+      eq_trans : forall x y z : T, eq x  y -> eq y z -> eq x z;
+      pix_ok : forall p1 p2 c1 c2 (t : T),
+          p1 <> p2 ->
+          eq (draw_pixel (draw_pixel t p2 c1) p1 c2)
+             (draw_pixel (draw_pixel t p1 c2) p2 c1)
   }.
+
 
 Definition distance (p1 p2 : point) : Z :=
   let dx := (fst p2) - (fst p1) in
@@ -174,19 +184,35 @@ Section interp.
         let t3 := draw_vline t2 (x,y) c h' in
                   draw_vline t3 (x+w,y) c h'
     | fill_rect p (w,h) c => fill_rect_rc t p (Z.to_nat w) (Z.to_nat h) c
-    (*| draw_rect p1 p2 c =>
-      match p1, p2 with
-      | (x,y), (z,w) => (* lower-left and upper-right *)
-        let t1 := interp_draw_line t c (x,y) (x,w) in
-        let t2 := interp_draw_line t1 c (x,y) (z,y) in
-        let t3 := interp_draw_line t2 c (x,w) (z,w) in
-        let t4 := interp_draw_line t3 c (z,w) (z,y) in
-        t4
-      end
-    *)
     | seq g1 g2 => let st := (interp t g1) in (interp st g2)
     end.
-  
+
   Definition run (e : g_com) : T :=
     interp (init_state tt) e.
+
+  Inductive DrawPixConst : T -> Type :=
+  | initSt :  DrawPixConst (init_state tt)
+  | updateSt : forall (t : T) s_size, DrawPixConst t -> 
+      DrawPixConst (update_state t s_size)
+  | drawPix : forall (t : T) p c, DrawPixConst t ->
+      DrawPixConst (draw_pixel t p c).                                  
+
+  (* Definition rebuild_g_com (g : g_com) : list  *)
+  Theorem EqualStates : forall (t : T) p1 p2 c1 c2,
+      p1 <> p2 -> 
+      eq (interp t (draw_pix p1 c1 ;; draw_pix p2 c2))
+      (interp t (draw_pix p2 c2 ;; draw_pix p1 c1)).
+    Proof.
+      intros.
+      destruct p0,p2.
+      simpl.
+      destruct H.
+      simpl in *.
+      auto.
+    Qed.
+    
+
+
+
+  
 End interp.

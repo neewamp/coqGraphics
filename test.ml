@@ -197,8 +197,7 @@ module Coq_Pos =
   | XO p0 -> XO (XO (square p0))
   | XH -> XH
 
-  (** val compare_cont :
-      comparison -> positive -> positive -> comparison **)
+  (** val compare_cont : comparison -> positive -> positive -> comparison **)
 
   let rec compare_cont r x y =
     match x with
@@ -230,8 +229,8 @@ module Coq_Pos =
     | _ -> True
 
   (** val sqrtrem_step :
-      (positive -> positive) -> (positive -> positive) ->
-      (positive*mask) -> positive*mask **)
+      (positive -> positive) -> (positive -> positive) -> (positive*mask) ->
+      positive*mask **)
 
   let sqrtrem_step f g = function
   | s,y ->
@@ -249,17 +248,13 @@ module Coq_Pos =
   let rec sqrtrem = function
   | XI p0 ->
     (match p0 with
-     | XI p1 ->
-       sqrtrem_step (fun x -> XI x) (fun x -> XI x) (sqrtrem p1)
-     | XO p1 ->
-       sqrtrem_step (fun x -> XO x) (fun x -> XI x) (sqrtrem p1)
+     | XI p1 -> sqrtrem_step (fun x -> XI x) (fun x -> XI x) (sqrtrem p1)
+     | XO p1 -> sqrtrem_step (fun x -> XO x) (fun x -> XI x) (sqrtrem p1)
      | XH -> XH,(IsPos (XO XH)))
   | XO p0 ->
     (match p0 with
-     | XI p1 ->
-       sqrtrem_step (fun x -> XI x) (fun x -> XO x) (sqrtrem p1)
-     | XO p1 ->
-       sqrtrem_step (fun x -> XO x) (fun x -> XO x) (sqrtrem p1)
+     | XI p1 -> sqrtrem_step (fun x -> XI x) (fun x -> XO x) (sqrtrem p1)
+     | XO p1 -> sqrtrem_step (fun x -> XO x) (fun x -> XO x) (sqrtrem p1)
      | XH -> XH,(IsPos XH))
   | XH -> XH,IsNul
 
@@ -490,11 +485,9 @@ type rgb = (z*z)*z
 let fromRGB = function
 | p,b ->
   let r,g = p in
-  Z.add
-    (Z.add r
-      (Z.mul g (Zpos (XO (XO (XO (XO (XO (XO (XO (XO XH)))))))))))
-    (Z.mul b (Zpos (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO
-      (XO (XO (XO XH))))))))))))))))))
+  Z.add (Z.add r (Z.mul g (Zpos (XO (XO (XO (XO (XO (XO (XO (XO XH)))))))))))
+    (Z.mul b (Zpos (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO (XO
+      (XO (XO XH))))))))))))))))))
 
 type color = z
 
@@ -526,8 +519,7 @@ let init_state x = x.init_state
 
 let update_state x = x.update_state
 
-(** val draw_pixel :
-    'a1 graphics_prims -> 'a1 -> point -> color -> 'a1 **)
+(** val draw_pixel : 'a1 graphics_prims -> 'a1 -> point -> color -> 'a1 **)
 
 let draw_pixel x = x.draw_pixel
 
@@ -539,8 +531,8 @@ let distance p1 p2 =
   Z.sqrt (Z.add (Z.square dx) (Z.square dy))
 
 (** val interpolate :
-    'a1 graphics_prims -> 'a1 -> nat -> point -> point -> point -> z ->
-    color -> 'a1 **)
+    'a1 graphics_prims -> 'a1 -> nat -> point -> point -> point -> z -> color
+    -> 'a1 **)
 
 let rec interpolate h t0 i p1 p2 v num_points c =
   match i with
@@ -550,15 +542,8 @@ let rec interpolate h t0 i p1 p2 v num_points c =
      | O -> h.draw_pixel t0 p1 c
      | S _ ->
        let p1' =
-         (Z.add (fst p1)
-           (Z.div (Z.mul (fst v) (Z.of_nat i)) num_points)),(Z.add
-                                                              (snd p1)
-                                                              (Z.div
-                                                              (Z.mul
-                                                              (snd v)
-                                                              (Z.of_nat
-                                                              i))
-                                                              num_points))
+         (Z.add (fst p1) (Z.div (Z.mul (fst v) (Z.of_nat i)) num_points)),
+         (Z.add (snd p1) (Z.div (Z.mul (snd v) (Z.of_nat i)) num_points))
        in
        h.draw_pixel (interpolate h t0 i' p1 p2 v num_points c) p1' c)
 
@@ -588,16 +573,14 @@ let rec fill_rect_rc h t0 p w h0 c =
   | O -> t0
   | S h' ->
     let x,y = p in
-    draw_hline h (fill_rect_rc h t0 p w h' c)
-      (x,(Z.add y (Z.of_nat h'))) c w
+    draw_hline h (fill_rect_rc h t0 p w h' c) (x,(Z.add y (Z.of_nat h'))) c w
 
 (** val interp_draw_line :
     'a1 graphics_prims -> 'a1 -> color -> point -> point -> 'a1 **)
 
 let interp_draw_line h t0 c p1 p2 =
   interpolate h t0 (sub (Z.to_nat (distance p1 p2)) (S O)) p1 p2
-    ((Z.sub (fst p2) (fst p1)),(Z.sub (snd p2) (snd p1)))
-    (distance p1 p2) c
+    ((Z.sub (fst p2) (fst p1)),(Z.sub (snd p2) (snd p1))) (distance p1 p2) c
 
 (** val interp : 'a1 graphics_prims -> 'a1 -> g_com -> 'a1 **)
 
@@ -615,8 +598,7 @@ let rec interp h t0 = function
   let h' = Z.to_nat h0 in
   let t1 = draw_hline h t0 (x,y) c w' in
   let t2 = draw_hline h t1 (x,(Z.add y h0)) c w' in
-  let t3 = draw_vline h t2 (x,y) c h' in
-  draw_vline h t3 ((Z.add x w),y) c h'
+  let t3 = draw_vline h t2 (x,y) c h' in draw_vline h t3 ((Z.add x w),y) c h'
 | Fill_rect (p, p0, c) ->
   let w,h0 = p0 in fill_rect_rc h t0 p (Z.to_nat w) (Z.to_nat h0) c
 | Seq (g1, g2) -> let st = interp h t0 g1 in interp h st g2
@@ -632,27 +614,40 @@ let ocaml_graphics_init = (fun _ -> Graphics.open_graph " 1920x1080")
 let ocaml_update_state s _ =
   s
 
-(** val ocaml_draw_pixel : oGState -> point -> color -> oGState **)
+(** val draw_pixel0 : oGState -> point -> color -> oGState **)
 
-let ocaml_draw_pixel =   (fun _ (p : point) c ->     let rec int_of_z po =   (match po with    |Z0 -> 0    |Zpos p'' ->      (match p'' with       | XH -> 1       | XO p' -> 2 * int_of_z (Zpos p')       | XI p' -> (2 * int_of_z (Zpos p')) + 1)    |Zneg p'' ->      (match p'' with       | XH -> -1       | XO p' -> 2 * int_of_z (Zneg p')       | XI p' -> (2 * int_of_z (Zneg p')) + 1))       in   Graphics.plot (int_of_z (fst p)) (int_of_z (snd p)); Graphics.set_color (int_of_z c));; 
+let draw_pixel0 =   (fun _ (p : point) c ->
+    let rec int_of_z po =
+  (match po with
+   |Z0 -> 0
+   |Zpos p'' ->
+     (match p'' with
+      | XH -> 1
+      | XO p' -> 2 * int_of_z (Zpos p')
+      | XI p' -> (2 * int_of_z (Zpos p')) + 1)
+   |Zneg p'' ->
+     (match p'' with
+      | XH -> -1
+      | XO p' -> 2 * int_of_z (Zneg p')
+      | XI p' -> (2 * int_of_z (Zneg p')) + 1))
+      in   Graphics.plot (int_of_z (fst p)) (int_of_z (snd p)); Graphics.set_color (int_of_z c));;
+
 
 (** val oGState_graphics_prims : oGState graphics_prims **)
 
 let oGState_graphics_prims =
-  { init_state = ocaml_graphics_init; update_state =
-    ocaml_update_state; draw_pixel = ocaml_draw_pixel }
+  { init_state = ocaml_graphics_init; update_state = ocaml_update_state;
+    draw_pixel = draw_pixel0 }
 
 (** val prog : g_com **)
 
 let prog =
-  Lineto (((Zpos (XO (XO (XI (XO (XO (XI XH))))))),(Zpos (XO (XO (XO
-    (XI (XO (XO (XI XH))))))))), ((Zpos (XO (XO (XI (XO (XO (XI (XO (XI
-    (XO (XI XH))))))))))),(Zpos (XO (XO (XI (XO (XO (XO (XO (XI (XI
-    XH))))))))))), red)
+  Lineto (((Zpos (XO (XO (XI (XO (XO (XI XH))))))),(Zpos (XO (XO (XO (XI (XO
+    (XO (XI XH))))))))), ((Zpos (XO (XO (XI (XO (XO (XI (XO (XI (XO (XI
+    XH))))))))))),(Zpos (XO (XO (XI (XO (XO (XO (XO (XI (XI XH))))))))))),
+    red)
 
 (** val t : oGState **)
 
 let t =
-  interp oGState_graphics_prims (oGState_graphics_prims.init_state ())
-    prog
-;;read_line();;
+  interp oGState_graphics_prims (oGState_graphics_prims.init_state ()) prog

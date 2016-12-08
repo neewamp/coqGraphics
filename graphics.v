@@ -9,16 +9,34 @@ Definition ocaml_graphics_init : unit -> OGState :=
   fun _ => initial_OGState.
 Definition ocaml_update_state : OGState -> point -> OGState :=
   fun (s : OGState) p => s.
-Definition ocaml_draw_pixel : OGState -> point -> color -> OGState :=
+Definition draw_pixel : OGState -> point -> color -> OGState :=
   fun (s:OGState) _ _ => s.
+
+Axiom eq : unit -> unit -> Prop.
+Axiom eq_refl : forall x, eq x x.
+Axiom eq_sym : forall x y, eq x y -> eq y x.
+Axiom eq_trans : forall x y z, eq x y -> eq y z -> eq x z.
+
+Axiom pix_ok : forall (p1 p2 : point) (c1 c2 : color) t,
+             p1 <> p2 ->
+             eq (draw_pixel (draw_pixel t p2 c1) p1 c2)
+               (draw_pixel (draw_pixel t p1 c2) p2 c1).
+
+
 
 Instance OGState_graphics_prims : graphics_prims OGState :=
   mkGraphicsPrims
     OGState
     ocaml_graphics_init
     ocaml_update_state
-    ocaml_draw_pixel.
+    draw_pixel
+    eq
+    eq_refl
+    eq_sym
+    eq_trans
+    pix_ok.
 
+  
 Require Import Ascii String.
 Definition s : string := "abc".
 
@@ -40,7 +58,7 @@ Extract Constant initial_OGState => "()".
 Extract Constant ocaml_graphics_init =>
   "(fun _ -> Graphics.open_graph "" 1920x1080"")".
 
-Extract Constant ocaml_draw_pixel =>
+Extract Constant draw_pixel =>
 "  (fun _ (p : point) c ->
     let rec int_of_z po =
   (match po with
