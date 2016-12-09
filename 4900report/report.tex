@@ -66,7 +66,29 @@ We propose that with some work our graphics implementation
 
 
 \section{Similar Projects}
-
+During our external research, we could not find another project where someone
+implemented a graphics library inside of Coq, however, there are many other
+functional languages that implement a graphics library. Examples of others
+are: Haskell, Scheme, Ocaml and pretty much any other functional language in
+which we can use axioms to instantiate the graphics primitives. The functional
+language that we focused on for our implementation of a graphics library was
+Ocaml graphics library. We chose to use the Ocaml graphics library as the
+model for our Coq graphics library for a few reasons. The most important
+aspect of Ocaml that led to use using it over any other functional language is
+that Coq is written in Ocaml, which makes translating and exporting functions
+from Ocaml to Coq more intuitive than if we had used another language like
+Haskell or Scheme. We took functions from the Ocaml graphics library like plot,
+open\_graph, color, lineto and implemented equivalent functions in Coq and
+then exported them as Ocaml to be displayed. In addition to recreating some
+of the Ocaml graphics functions in Coq, we also implemented some supporting
+functions like draw\_rect and fill\_rect and we proved some theorems about the
+specifications of these functions.
+Even though there have not been any attempts to implement a graphics library
+in coq, there has been research done in the verification of the specifications of
+geometric shapes in Coq. In Pham and Bertot’s paper “A Combination of a Dy-
+namic Geometry Software With a Proof Assistant for Interactive Formal Proofs,”
+\cite{geo} they adapted Coq’s tactic language to allow users to interactively
+construct simple proofs about geometric shapes.
 
 \section{Stucture Of code}
 
@@ -82,7 +104,6 @@ We propose that with some work our graphics implementation
     | draw_pix : point -> color -> g_com
     | open_graph : point -> g_com
     | resize_window : point  -> g_com
-    (* | close_graph : unit -> unit -> g_com *)
     | lineto : point -> point -> color -> g_com
     (* | draw_circle : point -> Z -> g_com *)
 
@@ -110,7 +131,11 @@ We propose that with some work our graphics implementation
     Context {T : Type} `{graphics_prims T}.
   \end{lstlisting}
 
-  Write some stuff lol.
+
+
+\subsection{Functions for Drawing}
+The following functions are what is used to implement an interpretation of the graphics class in a way that does not depend on the implementation than the type.
+
  \begin{lstlisting}
     Fixpoint interpolate (t : T) (i : nat) (p1 p2 V: point) (num_points : Z) c : T :=
     match i with
@@ -160,31 +185,32 @@ We propose that with some work our graphics implementation
     interp (init_state tt) e.
    End interp.
  \end{lstlisting}
-\subsection{Subsection2} This is a second subsection.
+% \subsection{Subsection2} This is a second subsection.
 
 
 
-This is a citation.~\cite{gennaro2010non}
-This is a chunk of code:
+% This is a citation.~\cite{gennaro2010non}
+% This is a chunk of code:
 
-\begin{lstlisting}
+% \begin{lstlisting}
 
-  Definition f(x : nat) := S x.
+%   Definition f(x : nat) := S x.
 
-  Definition g(y : nat) := f y.
+%   Definition g(y : nat) := f y.
 
-\end{lstlisting}
+% \end{lstlisting}
 
 
 
-This is inline code \lstinline|Fixpoint f(x : nat) := ...| typeset within a line of text.
+% This is inline code \lstinline|Fixpoint f(x : nat) := ...| typeset within a line of text.
 
-\paragraph{Para1.} This is a paragraph, or subsubsection.
+% \paragraph{Para1.} This is a paragraph, or subsubsection.
+
+
 
 \section{A brief history of Theology of coq and our lord and saviour also coq jesus.}
 
 \section{General description of our theory}
-
 \section{Similar Projects}
 \subsection{Other similar functional graphics libraries Ocaml}
 \subsection{Geometry stuff}
@@ -247,7 +273,7 @@ $\forall (x1,y1,x2,y2,w,h) \in Z, (x1,y1) \in ($rectangle x2 y2 w h$) \iff (x1,y
 This lemma let us replace our definition of in rectangle with the definition of in vline and in hline so we could use our previous lemmas in our proof.
 
 
-\section{Maybe stuff to add}
+%\section{Maybe stuff to add}
 Maybe geometry stuff ? 
 
 There is an educational thing in papers that tried to use coq to make a verified way to prove simple geometric things for students.
@@ -323,6 +349,7 @@ By extending this to the module system in Coq these specifications could be used
 \bibliographystyle{plain}
 
 \bibliography{references}
+
 
 
 
