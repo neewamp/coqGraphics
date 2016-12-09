@@ -1,0 +1,217 @@
+\documentclass{llncs}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\lstdefinelanguage{Coq}{
+  ,morekeywords={match,end,Definition,Inductive,Lemma,Record,
+    Variable,Section,case,of,if,then,else,is,let,in,do,return,with}%
+  ,keywordstyle=\bfseries
+  ,basicstyle=\sffamily
+  ,columns=fullflexible
+  ,numberstyle=\tiny
+  ,escapeinside={@}{@}
+  ,literate=
+  {<-}{{$\leftarrow\;$}}1
+  {=>}{{$\rightarrow\;$}}1
+  {->}{{$\rightarrow\;$}}1
+  {<->}{{$\leftrightarrow\;$}}1
+  {<==}{{$\leq\;$}}1
+  {\\/}{{$\vee\;$}}1
+  {/\\}{{$\land\;$}}1
+}
+\lstset{language=Coq}
+
+\begin{document}
+
+\title{Graphics in Coq for use in ...}
+
+\author{Nathan St. Amour \and ...}
+\institute{Ohio University, Athens, OH 45701}
+
+\maketitle
+
+
+\begin{abstract}
+We present a method for modeling graphics in coq that provides an intuitive way to certify and generate graphical programs by using the interactive
+theorem prover Coq.  Our uses a set of graphics primitives that can be used to implement typical functions that a user would expect in a *nix like
+standard library for graphics.  We show proof of concept and ease of extraction from the Coq code to OCaml. {\color{red} Need to add more}
+{\color{red} This all needs to be a lot clearer and more organized maybe talk about the primitives here?} There are two components of our implementation that provide it with flexibility and congruence between any instance. {\color{red}talk about what that means before this} There is a type class that lives at the highest level for our implementation.  The primary function of the type class is to provide functions that use the graphics
+primitives to affect a state that must be given when providing an instance of the type class. The next key component is the ability to be flexible with an instance of this graphics type class.  We have been able to write two instances that hold as a proof of concept for the graphics implementation.  The first instance uses finite maps to store the state of what has been drawn to the screen.  We have been successful in proving properties
+about the correctness of drawing lines, particularly in the vertical and horizontal directions, and regular rectangles drawn with lines that are
+either vertical or horizontal.  The corresponding functions for filling rectangles has also been proven.  The other instance of the graphics class is an axiomatic way of implementing the graphics in OCaml.  This is achieved by exporting the draw\_pixel command to the OCaml graphics plot command which is then called by the interp function in our graphics type class to draw to the screen.  {\color{red}Probably add some of the abstract
+to the introduction.}\end{abstract}
+
+\section{Introduction}
+Creating graphical programs may not be the first thing on the minds of the bold people using a purely functional proof assistant such as Coq.
+You should be easily convinced that this is the case by the resound lack of any attempt at modeling graphics in Coq.  However there are people
+who have put work into the formalization of geometry in Coq.  {\color{red} Talk about the geograbra people and the constructive geometry paper}
+ We propose that with some work our graphics implementation 
+
+\subsubsection{Similar projects} 
+
+
+ \section{The Graphics Type Class}
+ To begin we have implemented the syntax of a language of graphics commands(g\_com). The semantics of this language are defined in an interesting way, leaving the type of what we will call the current state of the screen as the type Type.  By not specifying the type of the state we are able to
+ provide a single implementation of functions that only rely on a small set of primitives that can be changed to reflect a certain goal.
+ {\color{red} Can we say that given the small set of primitives and an instances that seems resonable that specifications over this could be
+   provable for any instance? We should totally add in a dependency for building the graphics primitives.  Like some proofs about draw pixel that
+  make sure it will be equivalent over different instances. }
+
+ \begin{lstlisting}
+   Inductive g_com : Type :=
+    | draw_pix : point -> color -> g_com
+    | open_graph : point -> g_com
+    | resize_window : point  -> g_com
+    (* | close_graph : unit -> unit -> g_com *)
+    | lineto : point -> point -> color -> g_com
+    (* | draw_circle : point -> Z -> g_com *)
+
+   (* Rec with the bottom left point followed by the top right.*)          
+    | draw_rect : point -> point -> color -> g_com
+    | fill_rect : point -> point -> color -> g_com
+    | seq : g_com -> g_com -> g_com.
+
+   Notation "a ;; b" := (seq a b) (at level 50, left associativity).
+
+   (*These are the basic primitives that we build everything from*)
+   Class graphics_prims (T :Type) :=
+   mkGraphicsPrims
+   {
+     init_state : unit -> T;
+     update_state : T -> point -> T;
+     (*Add an update color*)
+     draw_pixel : T -> point -> color -> T;
+   }.
+
+   Section interp.
+    Context {T : Type} `{graphics_prims T}.
+
+  \end{lstlisting}
+  
+  Write some stuff lol.
+ \begin{lstlisting}
+    Fixpoint interpolate (t : T) (i : nat) (p1 p2 V: point) (num_points : Z) c : T :=
+    match i with
+     | O => draw_pixel t p1 c
+     | 1%nat => draw_pixel t p1 c
+     | S i' => let p1' :=
+     (((fst p1) + (fst V) * (Z.of_nat i) / num_points),
+     ((snd p1) + (snd V) * (Z.of_nat i) / num_points))
+     in
+     draw_pixel (interpolate t i' p1 p2 V num_points c) p1' c 
+    end.
+
+    Fixpoint draw_vline (t : T) (p : point) (c : color) (h : nat) : T :=
+    match h,p with
+     | O, _ => t
+     | S h', (x,y) => draw_pixel (draw_vline t p c h') (x,y+(Z.of_nat h')) c
+    end.
+
+    Fixpoint draw_hline (t : T) (p : point) (c : color) (w : nat) : T :=
+    match w,p with
+     | O, _ => t
+     | S w', (x,y) => draw_pixel (draw_hline t p c w') (x+(Z.of_nat w'),y) c
+    end.
+
+    Definition interp_draw_line (t : T) (c : color) (p1 p2 : point) : T :=
+    interpolate t (Z.to_nat (distance p1 p2) - 1) p1 p2 ((fst p2) - (fst p1), (snd p2) - (snd p1) ) (distance p1 p2) c.
+  
+    Fixpoint interp (t : T) (e : g_com) : T :=
+     match e with
+      | draw_pix p c => draw_pixel t p c
+      | open_graph s_size => update_state t s_size
+      | resize_window s_size => update_state t s_size 
+      | lineto p1 p2 c => let st := interp_draw_line t c p1 p2 in 
+       let st' := draw_pixel st p1 c in  draw_pixel st' p2 c
+      | draw_rect (x,y) (w,h) c =>
+        let w' := Z.to_nat w in
+        let h' := Z.to_nat h in
+        let t1 := draw_hline t (x,y) c w' in
+        let t2 := draw_hline t1 (x,y+h) c w' in
+        let t3 := draw_vline t2 (x,y) c h' in
+                  draw_vline t3 (x+w,y) c h'
+      | fill_rect p (w,h) c => fill_rect_rc t p (Z.to_nat w) (Z.to_nat h) c
+      | seq g1 g2 => let st := (interp t g1) in (interp st g2)
+     end.
+  
+    Definition run (e : g_com) : T :=
+    interp (init_state tt) e.
+   End interp.
+
+ \end{lstlisting}
+
+
+\subsection{Subsection2} This is a second subsection.
+
+This is a citation.~\cite{gennaro2010non}
+
+This is a chunk of code:
+\begin{lstlisting}
+  Definition f(x : nat) := S x.
+  Definition g(y : nat) := f y.
+\end{lstlisting}
+
+This is inline code \lstinline|Fixpoint f(x : nat) := ...| typeset within a line of text.
+
+\paragraph{Para1.} This is a paragraph, or subsubsection.
+
+
+
+\begin{section}{A brief history of Theology of coq and our lord and saviour also coq jesus.}\end{section}
+\begin{section}{General description of our theory}\end{section}
+\begin{section}{Similar Projects}\end{section}
+\begin{subsection}{Other similar functional graphics libraries Ocaml}\end{subsection}
+\begin{subsection}{Geometry stuff}\end{subsection}
+\begin{subsection}{Flattery}\end{subsection}
+\begin{subsection}{Other similar functional graphics libraries} \end{subsection} 
+\begin{subsubsection}{Ocaml}\end{subsubsection}
+\begin{section}{Proofs}\end{section}
+To prove the correctness of our drawing functions, we first made a specification of whether a point is in a shape, then we proved that if we draw a shape to a state, then, for any point, if that point is in the shape, the color at that point would be equal to the color of the shape we drew, otherwise the color at that point would be the same as the color in the original state.
+
+The specification for if a point is in a vertical line is as followed
+
+$\forall (x1,y1) \in Z, (x1,y1) \in vline (x2,y2,h) \iff x1 = x2 \land y1 >= y2 \land y1 < y2 + h$
+
+Our proof of correctness stated
+
+$\forall (x1,y1,x2,y2,h) \in Z st \in State, (x1,y1) \in vline (x2,y2,h) $
+
+The specification for if a point is in a horizontal line is as followed
+
+$\forall (x1,y1) \in Z, (x1,y1) \in hline (x2,y2,w) \iff y1 = y2 \land x1 >= x2 \land x1 < x2 + w$
+
+
+
+
+
+\begin{section}{Future Plans}\end{section}
+Maybe geometry stuff ? 
+There is an educational thing in papers that tried to use coq to make a verified way to prove simple geometric things for students.
+Structure of Code
+Flattery
+Explanation of each function/the type class
+Flattery
+draw\_vline
+Draw\_hline
+Draw\_rect
+fill\_rect
+lineTo
+Also add stuff about the specific instances like how they are implemented
+Proofs
+Pics n’ Shit 
+Future plans for project
+User Coq to cure cancer 
+Conclusions
+Flattery
+
+
+
+
+
+
+\section{Conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
