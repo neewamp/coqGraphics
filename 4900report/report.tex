@@ -341,6 +341,12 @@ Theorem draw_pixEqualStates : forall (t : T) (p1 p2 : point) (c1 c2 : color),
 This provides a proof of concept that using requiring specifications about functions could allow for proofs for any that fits the specifications.
 By extending this to the module system in Coq these specifications could be used to build machinery that would prove useful in more advanced generalizations.  The more general proofs would also provide an intuitive way to apply those proofs to additions to instances of the module.
 
+This provides a proof of concept that using requiring specifications about functions could allow for proofs for any that fits the specifications.
+By extending this to the module system in Coq these specifications could be used to build machinery that would prove useful in more advanced generalizations.  The more general proofs would also provide an intuitive way to apply those proofs to additions to instances of the module.
+
+We will also add the ability to draw more shapes. We have plans for drawing and filling circles, triangles and arbitrary polygons. We have not included those as the complexity of drawing and writing and proving specifications would be outside of the scope of this project.
+
+The last feature we plan to add is buffers. Our drawing functions could have the ability to draw to a buffer rather than directly to the screen. This buffer could then be drawn to the screen or another buffer. We will add the ability to preform transformations to this buffer, such as translating, rotating, and scaling. Since these are all basic matrix operations, they should be relatively simple to implement.
 
 \section{Conclusion}
 
