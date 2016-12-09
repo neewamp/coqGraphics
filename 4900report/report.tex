@@ -200,7 +200,53 @@ To prove the correctness of our drawing functions, we first made a specification
 
 The specification for if a point is in a vertical line is as followed
 
-$\forall (x1,x2) \in Z, (x1,x2) \in rect (x,y,w,h) \iff x1 = x2 \land $
+\begin {definition} [on\_vline]
+$\forall (x1,y1) \in Z, (x1,y1) \in vline (x2,y2,h) \iff x1 = x2 \land y1 >= y2 \land y1 < y2 + h$
+\end {definition}
+
+Our proof of correctness of the drawing a vertical line is as followed
+
+\begin {theorem} [vline\_correct]
+$\forall (x1,y1,x2,y2,h) \in Z, \forall c \in Color,\forall st \in State, (x1,y1) \in vline (x2,y2,h) \rightarrow ($ draw\_vline st x2 y2 c $)_{(x1,y2)} = c \land \neg ((x1,y2) \in vline (x2,y2,h)) \rightarrow ($draw\_vline st x2 y2 h c$)_{(x1,y2)} = st_{(x1,y2)} $
+\end {theorem}
+
+For this proof we used a lemma that stated that if a point is on a vertical line with height (n+1), then the point is either on the line with height n, or it is equal to the point at the end of the line, or more formally,
+
+\begin {lemma} [vline\_correct\_aux]
+$\forall (x1,y1,x2,y1,h) \in Z, (x1,y1) \in $(vline x2 y2 (h+1))$ \iff (x1,y1) \in $(vline x2 y1 h)$ \lor (x1,y1)=(x2,y2+h)$
+\end {lemma}
+
+
+The specification for if a point is in a horizontal line is as followed
+
+\begin {definition} [on\_hline]
+$\forall (x1,y1) \in Z, (x1,y1) \in hline (x2,y2,w) \iff y1 = y2 \land x1 >= x2 \land x1 < x2 + w$
+\end {definition}
+
+The proof for correctness of draw\_vline was nearly identical to the proof for draw\_hline.
+\begin {theorem} [hline\_correct]
+$\forall (x1,y1,x2,y2,w) \in Z, \forall c \in Color,\forall st \in State, (x1,y1) \in hline (x2,y2,w) \rightarrow ($ draw\_hline st x2 y2 c $)_{(x1,y2)} = c \land \neg ((x1,y2) \in vline (x2,y2,w)) \rightarrow ($draw\_hline st x2 y2 h c$)_{(x1,y2)} = st_{(x1,y2)} $
+\end {theorem}
+
+
+
+\begin {definition}[in\_rectangle]
+	$\forall (x1,y1,x2,y1,w,h) \in Z, (x1,y1) \in ($rectangle x2 y2 w h$) \iff x1 >= x2 \land y1>=y2 \land x1 < x2 + w \land y1 < y2 + h $
+\end {definition}
+
+\begin {theorem} [fill\_rect\_correct]
+$\forall (x1,y1,x2,y1,w,h) \in Z, \forall st \in State, \forall c \in Color, (x1,y1) \in $(rectangle x2 y2 w h)$ \rightarrow ($fill\_rect st (x2,y2) w h c$)_{(x1,y1)} = c \land \neg $(rectangle x2 y2 w h)$ \rightarrow ($fill\_rect st (x2,y2) w h c$)_{(x1,y1)} = st_{(x1,y1)}$
+\end {theorem}
+
+To prove this, we used the lemma:
+
+\begin {lemma} [fill\_rect\_correct\_aux]
+$\forall (x1,y1,x2,y2,w,h) \in Z, (x1,y1) \in ($rectangle x2 y2 w h$) \iff (x1,y2) \in ($hline x1 y2 w$) \land (x2,y1) \in ($vline x1 y2 h$) $
+\end {lemma}
+
+This lemma let us replace our definition of in rectangle with the definition of in vline and in hline so we could use our previous lemmas in our proof.
+
+
 \section{Maybe stuff to add}
 Maybe geometry stuff ? 
 
