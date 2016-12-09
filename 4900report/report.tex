@@ -48,7 +48,7 @@ who have put work into the formalization of geometry in Coq.  {\color{red} Talk 
  We propose that with some work our graphics implementation 
 
  \section{The Graphics Type Class}
- To begin we have implemented the syntax of a language of graphics commands(g_com). The semantics of this language are defined in an interesting way, leaving the type of what we will call the current state of the screen as the type Type.  By not specifying the type of the state we are able to
+ To begin we have implemented the syntax of a language of graphics commands(g\_com). The semantics of this language are defined in an interesting way, leaving the type of what we will call the current state of the screen as the type Type.  By not specifying the type of the state we are able to
  provide a single implementation of functions that only rely on a small set of primitives that can be changed to reflect a certain goal.
  {\color{red} Can we say that given the small set of primitives and an instances that seems resonable that specifications over this could be
    provable for any instance? We should totally add in a dependency for building the graphics primitives.  Like some proofs about draw pixel that
