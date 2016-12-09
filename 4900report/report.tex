@@ -40,9 +40,7 @@ theorem prover Coq.  Our uses a set of graphics primitives that can be used to i
 standard library for graphics.  We show proof of concept and ease of extraction from the Coq code to OCaml. {\color{red} Need to add more}
 {\color{red} This all needs to be a lot clearer and more organized maybe talk about the primitives here?} There are two components of our implementation that provide it with flexibility and congruence between any instance. {\color{red}talk about what that means before this} There is a type class that lives at the highest level for our implementation.  The primary function of the type class is to provide functions that use the graphics
 primitives to affect a state that must be given when providing an instance of the type class. The next key component is the ability to be flexible with an instance of this graphics type class.  We have been able to write two instances that hold as a proof of concept for the graphics implementation.  The first instance uses finite maps to store the state of what has been drawn to the screen.  We have been successful in proving properties
-
 about the correctness of drawing lines, particularly in the vertical and horizontal directions, and regular rectangles drawn with lines that are
-
 either vertical or horizontal.  The corresponding functions for filling rectangles has also been proven.  The other instance of the graphics class is an axiomatic way of implementing the graphics in OCaml.  This is achieved by exporting the draw\_pixel command to the OCaml graphics plot command which is then called by the interp function in our graphics type class to draw to the screen.  {\color{red}Probably add some of the abstract
   to the introduction.}
 \end{abstract}
@@ -250,7 +248,14 @@ Flattery
 
 
 \section{Future Plans}
+There have been several plans for addition and improvement that we plan to work on in the future.  Overall the project has been a success for the
+time given.  The results of extracting an instance designed for OCaml showed us that implementing functions that draw to a significant fraction of the screen are much too slow for any kind of practical usage.  Since the only primitive that we can use to draw to the screen is draw\_pixel it seems to be impossible to improve the drawing speed.
 
+A possible solution that we are thinking about implementing would move away from a type class and into a module.  The idea would be very similar a function for drawing pixels would be provided and all of the previous functions could be implemented as a functor from our new module type for graphics to functions and proofs using the given functions.  However we would then assume for extraction that there is a function that instantly draw all of the points that need to be drawn to the screen.  This would ultimately be a function, $f :Type \rightarrow point \rightarrow point \rightarrow Type,$ with the purpose of either putting all of the points into the map at once, allowing the modeling of what is hopefully something close to the OCaml draw line function and efficient extracted code.
+
+There are multiple properties that could be provided to the module that ensure any instance of the module type would behave in a similar way.  For example the state would have certain properties that it the module type would require.  This is important for writing more general proofs over instances with type for the state and for ensuring that different instances do not implement the new functions in ways that could be incorrect.
+
+It shouldn't be hard to see the merits in writing proofs that live at a level above the implementation.  One of the first proofs that we wrote for the Coq implementation, using maps of type $point \rightarrow color$, was reasonable to complete at a similar level.  An invariant about 
 
 
 \section{Conclusion}
