@@ -5,6 +5,7 @@
 \setcounter{secnumdepth}{5}
 \usepackage{hyperref}
 
+
 \hypersetup{
     colorlinks,
     citecolor=black,
@@ -12,8 +13,6 @@
     linkcolor=violet,
     urlcolor=black
 }
-
-
 
 \lstdefinelanguage{Coq}{
   ,morekeywords={match,end,Definition,Inductive,Lemma,Record,
@@ -33,7 +32,8 @@
   {/\\}{{$\land\;$}}1
 }
 
-\lstset{language=Coq}
+\lstset{language=Coq,breaklines=true,basicstyle=\footnotesize}%%, frame=single}
+\usepackage{scrextend}
 
 \begin{document}
 
@@ -248,19 +248,26 @@ Flattery
 There have been several plans for addition and improvement that we plan to work on in the future.  Overall the project has been a success for the
 time given.  The results of extracting an instance designed for OCaml showed us that implementing functions that draw to a significant fraction of the screen are much too slow for any kind of practical usage.  Since the only primitive that we can use to draw to the screen is draw\_pixel it seems to be impossible to improve the drawing speed.
 
-A possible solution that we are thinking about implementing would move away from a type class and into a module.  The idea would be very similar a function for drawing pixels would be provided and all of the previous functions could be implemented as a functor from our new module type for graphics to functions and proofs using the given functions.  However we would then assume for extraction that there is a function that instantly draw all of the points that need to be drawn to the screen.  This would ultimately be a function, $f :Type \rightarrow point \rightarrow point \rightarrow Type,$ with the purpose of either putting all of the points into the map at once, allowing the modeling of what is hopefully something close to the OCaml draw line function and efficient extracted code.
+A possible solution would be a move away from the type class of graphic primitives and into a module.  The idea would be very similar a function for drawing pixels would be provided and all of the previous functions could be implemented as a functor from our new module type for graphics to functions and proofs using the given functions.  However we would then assume for extraction that there is a function that instantly draw all of the points that need to be drawn to the screen.  This would ultimately be a function, $f :Type \rightarrow point \rightarrow point \rightarrow Type,$ with the purpose of either putting all of the points into the map at once, allowing the modeling of what is hopefully something close to the OCaml draw line function and efficient extracted code.
 
 There are multiple properties that could be provided to the module that ensure any instance of the module type would behave in a similar way.  For example the state would have certain properties that it the module type would require.  This is important for writing more general proofs over instances with type for the state and for ensuring that different instances do not implement the new functions in ways that could be incorrect.
 
-It shouldn't be hard to see the merits in writing proofs that live at a level above the implementation.  One of the first proofs that we wrote for the Coq implementation, specifically using maps of type : $point \rightarrow color$, was reasonable to complete at a similar level.  The Theorem simply states that:
-
-\begin{theorem}[Draw Pixel Correct]
-\forall (t : Type) p1 p2 p
-
-
+It shouldn't be hard to see the merits in writing proofs that live at a level above the implementation.  One of the first proofs that we wrote for the Coq implementation, specifically using maps of type : $point \rightarrow color$, was reasonable to complete at a similar level.  We simply stated the theorem as:
+\begin{theorem}
+  $\forall$ (t : Type), The two states( st1 st2 : t) that result from drawing two points are the same only if the points are not equal $\land$ the same color is used for pixels drawn that result in the two states.
 \end{theorem}
 
-if two points are drawn using draw\_pixel  An invariant about the draw pixel function was very easy to add into the class. It was then easy to use it to prove 
+Currently this has been proved by an invariant added to the draw\_pixel function that states this theorem and must be satisfied in order to create an instance of the class.  By using modules and specifications how a state is defined it should be possible to produce a canonical form of any program implemented with draw\_pixel.  From there it shouldn't be hard to provide a reasonable definition of equality between two states, leading to this proofs of this theorem and many others over states.
+
+\begin{lstlisting}
+Theorem draw_pixEqualStates : forall (t : T) (p1 p2 : point) (c1 c2 : color),
+ p1 <> p2 -> 
+   eq (interp t (draw_pix p1 c1 ;; draw_pix p2 c2))
+      (interp t (draw_pix p2 c2 ;; draw_pix p1 c1)).
+\end{lstlisting}
+
+This provides a proof of concept that using requiring specifications about functions could allow for proofs for any that fits the specifications.
+By extending this to the module system in Coq these specifications could be used to build machinery that would prove useful in more advanced generalizations.  The more general proofs would also provide an intuitive way to apply those proofs to additions to instances of the module.
 
 
 \section{Conclusion}
