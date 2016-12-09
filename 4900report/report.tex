@@ -1,6 +1,19 @@
 \documentclass{llncs}
 \usepackage{xcolor}
 \usepackage{listings}
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=violet,
+    urlcolor=black
+}
+
+
 
 \lstdefinelanguage{Coq}{
   ,morekeywords={match,end,Definition,Inductive,Lemma,Record,
@@ -19,17 +32,15 @@
   {\\/}{{$\vee\;$}}1
   {/\\}{{$\land\;$}}1
 }
+
 \lstset{language=Coq}
 
 \begin{document}
 
 \title{Graphics in Coq for use in ...}
-
 \author{Nathan St. Amour \and ...}
 \institute{Ohio University, Athens, OH 45701}
-
 \maketitle
-
 
 \begin{abstract}
 We present a method for modeling graphics in coq that provides an intuitive way to certify and generate graphical programs by using the interactive
@@ -39,25 +50,34 @@ standard library for graphics.  We show proof of concept and ease of extraction 
 primitives to affect a state that must be given when providing an instance of the type class. The next key component is the ability to be flexible with an instance of this graphics type class.  We have been able to write two instances that hold as a proof of concept for the graphics implementation.  The first instance uses finite maps to store the state of what has been drawn to the screen.  We have been successful in proving properties
 about the correctness of drawing lines, particularly in the vertical and horizontal directions, and regular rectangles drawn with lines that are
 either vertical or horizontal.  The corresponding functions for filling rectangles has also been proven.  The other instance of the graphics class is an axiomatic way of implementing the graphics in OCaml.  This is achieved by exporting the draw\_pixel command to the OCaml graphics plot command which is then called by the interp function in our graphics type class to draw to the screen.  {\color{red}Probably add some of the abstract
-to the introduction.}\end{abstract}
+  to the introduction.}
+\end{abstract}
+\tableofcontents
+\newpage
 
 \section{Introduction}
+
 Creating graphical programs may not be the first thing on the minds of the bold people using a purely functional proof assistant such as Coq.
 You should be easily convinced that this is the case by the resound lack of any attempt at modeling graphics in Coq.  However there are people
 who have put work into the formalization of geometry in Coq.  {\color{red} Talk about the geograbra people and the constructive geometry paper}
- We propose that with some work our graphics implementation 
+We propose that with some work our graphics implementation 
 
 \subsubsection{Similar projects} 
 
 
- \section{The Graphics Type Class}
+\section{Similar Projects}
+
+
+\section{Stucture Of code}
+
+\subsection{The Graphics Type Class}
  To begin we have implemented the syntax of a language of graphics commands(g\_com). The semantics of this language are defined in an interesting way, leaving the type of what we will call the current state of the screen as the type Type.  By not specifying the type of the state we are able to
  provide a single implementation of functions that only rely on a small set of primitives that can be changed to reflect a certain goal.
  {\color{red} Can we say that given the small set of primitives and an instances that seems resonable that specifications over this could be
    provable for any instance? We should totally add in a dependency for building the graphics primitives.  Like some proofs about draw pixel that
   make sure it will be equivalent over different instances. }
 
- \begin{lstlisting}
+\begin{lstlisting}
    Inductive g_com : Type :=
     | draw_pix : point -> color -> g_com
     | open_graph : point -> g_com
@@ -79,15 +99,17 @@ who have put work into the formalization of geometry in Coq.  {\color{red} Talk 
    {
      init_state : unit -> T;
      update_state : T -> point -> T;
+
      (*Add an update color*)
      draw_pixel : T -> point -> color -> T;
+
    }.
 
    Section interp.
-    Context {T : Type} `{graphics_prims T}.
 
+    Context {T : Type} `{graphics_prims T}.
   \end{lstlisting}
-  
+
   Write some stuff lol.
  \begin{lstlisting}
     Fixpoint interpolate (t : T) (i : nat) (p1 p2 V: point) (num_points : Z) c : T :=
@@ -115,7 +137,7 @@ who have put work into the formalization of geometry in Coq.  {\color{red} Talk 
 
     Definition interp_draw_line (t : T) (c : color) (p1 p2 : point) : T :=
     interpolate t (Z.to_nat (distance p1 p2) - 1) p1 p2 ((fst p2) - (fst p1), (snd p2) - (snd p1) ) (distance p1 p2) c.
-  
+
     Fixpoint interp (t : T) (e : g_com) : T :=
      match e with
       | draw_pix p c => draw_pixel t p c
@@ -133,72 +155,123 @@ who have put work into the formalization of geometry in Coq.  {\color{red} Talk 
       | fill_rect p (w,h) c => fill_rect_rc t p (Z.to_nat w) (Z.to_nat h) c
       | seq g1 g2 => let st := (interp t g1) in (interp st g2)
      end.
-  
+
     Definition run (e : g_com) : T :=
     interp (init_state tt) e.
    End interp.
-
  \end{lstlisting}
-
-
 \subsection{Subsection2} This is a second subsection.
 
-This is a citation.~\cite{gennaro2010non}
 
+
+This is a citation.~\cite{gennaro2010non}
 This is a chunk of code:
+
 \begin{lstlisting}
+
   Definition f(x : nat) := S x.
+
   Definition g(y : nat) := f y.
+
 \end{lstlisting}
+
+
 
 This is inline code \lstinline|Fixpoint f(x : nat) := ...| typeset within a line of text.
 
 \paragraph{Para1.} This is a paragraph, or subsubsection.
 
+\section{A brief history of Theology of coq and our lord and saviour also coq jesus.}
 
+\section{General description of our theory}
 
-\begin{section}{A brief history of Theology of coq and our lord and saviour also coq jesus.}\end{section}
-\begin{section}{General description of our theory}\end{section}
-\begin{section}{Similar Projects}\end{section}
-\begin{subsection}{Other similar functional graphics libraries Ocaml}\end{subsection}
-\begin{subsection}{Geometry stuff}\end{subsection}
-\begin{subsection}{Flattery}\end{subsection}
-\begin{subsection}{Other similar functional graphics libraries} \end{subsection} 
-\begin{subsubsection}{Ocaml}\end{subsubsection}
-\begin{section}{Proofs}\end{section}
+\section{Similar Projects}
+\subsection{Other similar functional graphics libraries Ocaml}
+\subsection{Geometry stuff}
+
+\subsection{Flattery}
+
+\subsection{Other similar functional graphics libraries} 
+
+\subsection{Ocaml}
+
+\section{Proofs}
 To prove the correctness of our drawing functions, we first made a specification of whether a point is in a shape, then we proved that if we draw a shape to a state, then, for any point, if that point is in the shape, the color at that point would be equal to the color of the shape we drew, otherwise the color at that point would be the same as the color in the original state.
 
 The specification for if a point is in a vertical line is as followed
 
 $\forall (x1,x2) \in Z, (x1,x2) \in rect (x,y,w,h) \iff x1 = x2 \land $
-\begin{section}{Future Plans}\end{section}
+\section{Maybe stuff to add}
 Maybe geometry stuff ? 
+
 There is an educational thing in papers that tried to use coq to make a verified way to prove simple geometric things for students.
+
 Structure of Code
+
 Flattery
+
 Explanation of each function/the type class
+
 Flattery
+
 draw\_vline
+
 Draw\_hline
+
 Draw\_rect
+
 fill\_rect
+
 lineTo
+
 Also add stuff about the specific instances like how they are implemented
+
 Proofs
+
 Pics n’ Shit 
+
 Future plans for project
+
 User Coq to cure cancer 
+
 Conclusions
+
 Flattery
 
 
+\subsection{Instances}
+  \subsubsection{OCaml}
+  \subsubsection{Coq State Map}
 
 
+\section{Future Plans}
+There have been several plans for addition and improvement that we plan to work on in the future.  Overall the project has been a success for the
+time given.  The results of extracting an instance designed for OCaml showed us that implementing functions that draw to a significant fraction of the screen are much too slow for any kind of practical usage.  Since the only primitive that we can use to draw to the screen is draw\_pixel it seems to be impossible to improve the drawing speed.
+
+A possible solution that we are thinking about implementing would move away from a type class and into a module.  The idea would be very similar a function for drawing pixels would be provided and all of the previous functions could be implemented as a functor from our new module type for graphics to functions and proofs using the given functions.  However we would then assume for extraction that there is a function that instantly draw all of the points that need to be drawn to the screen.  This would ultimately be a function, $f :Type \rightarrow point \rightarrow point \rightarrow Type,$ with the purpose of either putting all of the points into the map at once, allowing the modeling of what is hopefully something close to the OCaml draw line function and efficient extracted code.
+
+There are multiple properties that could be provided to the module that ensure any instance of the module type would behave in a similar way.  For example the state would have certain properties that it the module type would require.  This is important for writing more general proofs over instances with type for the state and for ensuring that different instances do not implement the new functions in ways that could be incorrect.
+
+It shouldn't be hard to see the merits in writing proofs that live at a level above the implementation.  One of the first proofs that we wrote for the Coq implementation, specifically using maps of type : $point \rightarrow color$, was reasonable to complete at a similar level.  The Theorem simply states that:
+
+\begin{theorem}[Draw Pixel Correct]
+\forall (t : Type) p1 p2 p
+
+
+\end{theorem}
+
+if two points are drawn using draw\_pixel  An invariant about the draw pixel function was very easy to add into the class. It was then easy to use it to prove 
 
 
 \section{Conclusion}
 
+
+
 \bibliographystyle{plain}
+
 \bibliography{references}
 
+
+
 \end{document}
+
