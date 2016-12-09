@@ -157,12 +157,21 @@ This is inline code \lstinline|Fixpoint f(x : nat) := ...| typeset within a line
 
 
 
-\begin{section}A brief history of Theology of coq and our lord and saviour also coq jesus.\end{section}
-\begin{section}General description of our theory\end{section}
-\begin{section}Similar Projects\end{section}
-\begin{subsection}Flattery\end{subsection}
-\begin{subsection}Other similar functional graphics libraries \end{subsection} 
-\begin{subsubsection}Ocaml\end{subsubsection}
+\begin{section}{A brief history of Theology of coq and our lord and saviour also coq jesus.}\end{section}
+\begin{section}{General description of our theory}\end{section}
+\begin{section}{Similar Projects}\end{section}
+\begin{subsection}{Other similar functional graphics libraries Ocaml}\end{subsection}
+\begin{subsection}{Geometry stuff}\end{subsection}
+\begin{subsection}{Flattery}\end{subsection}
+\begin{subsection}{Other similar functional graphics libraries} \end{subsection} 
+\begin{subsubsection}{Ocaml}\end{subsubsection}
+\begin{section}{Proofs}\end{section}
+To prove the correctness of our drawing functions, we first made a specification of whether a point is in a shape, then we proved that if we draw a shape to a state, then, for any point, if that point is in the shape, the color at that point would be equal to the color of the shape we drew, otherwise the color at that point would be the same as the color in the original state.
+
+The specification for if a point is in a vertical line is as followed
+
+$\forall (x1,x2) \in Z, (x1,x2) \in rect (x,y,w,h) \iff x1 = x2 \and $
+\begin{section}{Future Plans}\end{section}
 Maybe geometry stuff ? 
 There is an educational thing in papers that tried to use coq to make a verified way to prove simple geometric things for students.
 Structure of Code
