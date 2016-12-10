@@ -58,10 +58,6 @@ You should be easily convinced that this is the case by the resound lack of any 
 who have put work into the formalization of geometry in Coq. There are two components of our implementation that provide it with flexibility and congruence between any instance. There is a type class that lives at the highest level for our implementation.  The primary function of the type class is to provide functions that use the graphics primitives to affect a state that must be given when providing an instance of the type class. The next key component is the ability to be flexible with an instance of this graphics type class.  We have been able to write two instances that hold as a proof of concept for the graphics implementation.  The first instance uses finite maps to store the state of what has been drawn to the screen.  We have been successful in proving properties about the correctness of drawing lines, particularly in the vertical and horizontal directions, and regular rectangles drawn with lines that are either vertical or horizontal.  The corresponding functions for filling rectangles has also been proven.  The other instance of the graphics class is an axiomatic way of implementing the graphics in OCaml.  This is achieved by exporting the draw\_pixel command to the OCaml graphics plot command which is then called by the interp function in our graphics type class to draw to the screen.
 The with some work the graphics implementation that we present could become a rhobust tool for developing graphical programs.
 
-
-
-
-
 \section{Similar Projects}
 During our external research, we could not find another project where someone
 implemented a graphics library inside of Coq, however, there are many other
@@ -75,10 +71,10 @@ aspect of Ocaml that led to use using it over any other functional language is
 that Coq is written in Ocaml, which makes translating and exporting functions
 from Ocaml to Coq more intuitive than if we had used another language like
 Haskell or Scheme. We took functions from the Ocaml graphics library like plot,
-open_graph, color, lineto and implemented equivalent functions in Coq and
+open\_graph, color, lineto and implemented equivalent functions in Coq and
 then exported them as Ocaml to be displayed. In addition to recreating some
 of the Ocaml graphics functions in Coq, we also implemented some supporting
-functions like draw_rect and fill_rect and we proved some theorems about the
+functions like draw\_rect and fill\_rect and we proved some theorems about the
 specifications of these functions.  Even though there have not been any attempts to implement a graphics library
 in coq, there has been research done in the verification of the specifications of
 geometric shapes in Coq. In Pham and Bertot’s paper “A Combination of a 
