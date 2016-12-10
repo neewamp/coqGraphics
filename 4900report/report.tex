@@ -46,11 +46,7 @@
 We present a method for modeling graphics in coq that provides an intuitive way to certify and generate graphical programs by using the interactive
 theorem prover Coq.  Our uses a set of graphics primitives that can be used to implement typical functions that a user would expect in a *nix like
 standard library for graphics.  We show proof of concept and ease of extraction from the Coq code to OCaml. {\color{red} Need to add more}
-{\color{red} This all needs to be a lot clearer and more organized maybe talk about the primitives here?} There are two components of our implementation that provide it with flexibility and congruence between any instance. {\color{red}talk about what that means before this} There is a type class that lives at the highest level for our implementation.  The primary function of the type class is to provide functions that use the graphics
-primitives to affect a state that must be given when providing an instance of the type class. The next key component is the ability to be flexible with an instance of this graphics type class.  We have been able to write two instances that hold as a proof of concept for the graphics implementation.  The first instance uses finite maps to store the state of what has been drawn to the screen.  We have been successful in proving properties
-about the correctness of drawing lines, particularly in the vertical and horizontal directions, and regular rectangles drawn with lines that are
-either vertical or horizontal.  The corresponding functions for filling rectangles has also been proven.  The other instance of the graphics class is an axiomatic way of implementing the graphics in OCaml.  This is achieved by exporting the draw\_pixel command to the OCaml graphics plot command which is then called by the interp function in our graphics type class to draw to the screen.  {\color{red}Probably add some of the abstract
-  to the introduction.}
+{\color{red} This all needs to be a lot clearer and more organized maybe talk about the primitives here?} 
 \end{abstract}
 \tableofcontents
 \newpage
@@ -59,10 +55,11 @@ either vertical or horizontal.  The corresponding functions for filling rectangl
 
 Creating graphical programs may not be the first thing on the minds of the bold people using a purely functional proof assistant such as Coq.
 You should be easily convinced that this is the case by the resound lack of any attempt at modeling graphics in Coq.  However there are people
-who have put work into the formalization of geometry in Coq.  {\color{red} Talk about the geograbra people and the constructive geometry paper}
-We propose that with some work our graphics implementation 
+who have put work into the formalization of geometry in Coq. There are two components of our implementation that provide it with flexibility and congruence between any instance. There is a type class that lives at the highest level for our implementation.  The primary function of the type class is to provide functions that use the graphics primitives to affect a state that must be given when providing an instance of the type class. The next key component is the ability to be flexible with an instance of this graphics type class.  We have been able to write two instances that hold as a proof of concept for the graphics implementation.  The first instance uses finite maps to store the state of what has been drawn to the screen.  We have been successful in proving properties about the correctness of drawing lines, particularly in the vertical and horizontal directions, and regular rectangles drawn with lines that are either vertical or horizontal.  The corresponding functions for filling rectangles has also been proven.  The other instance of the graphics class is an axiomatic way of implementing the graphics in OCaml.  This is achieved by exporting the draw\_pixel command to the OCaml graphics plot command which is then called by the interp function in our graphics type class to draw to the screen.
+The with some work the graphics implementation that we present could become a rhobust tool for developing graphical programs.
 
-\subsubsection{Similar projects} 
+
+
 
 
 \section{Similar Projects}
@@ -94,10 +91,12 @@ construct simple proofs about geometric shapes.
 
 \subsection{The Graphics Type Class}
  To begin we have implemented the syntax of a language of graphics commands(g\_com). The semantics of this language are defined in an interesting way, leaving the type of what we will call the current state of the screen as the type Type.  By not specifying the type of the state we are able to
- provide a single implementation of functions that only rely on a small set of primitives that can be changed to reflect a certain goal.
+ provide a single implementation of functions that only rely on a small set of primitives that can be changed to reflect a certain goal. 
  {\color{red} Can we say that given the small set of primitives and an instances that seems resonable that specifications over this could be
    provable for any instance? We should totally add in a dependency for building the graphics primitives.  Like some proofs about draw pixel that
   make sure it will be equivalent over different instances. }
+
+We have times two instances of the graphics\_prims type class.
 
 \begin{lstlisting}
    Inductive g_com : Type :=
