@@ -4,7 +4,7 @@
 \setcounter{tocdepth}{5}
 \setcounter{secnumdepth}{5}
 \usepackage{hyperref}
-
+\usepackage{graphicx}
 
 \hypersetup{
     colorlinks,
@@ -45,8 +45,7 @@
 \begin{abstract}
 We present a method for modeling graphics in coq that provides an intuitive way to certify and generate graphical programs by using the interactive
 theorem prover Coq.  Our uses a set of graphics primitives that can be used to implement typical functions that a user would expect in a *nix like
-standard library for graphics.  We show proof of concept and ease of extraction from the Coq code to OCaml. {\color{red} Need to add more}
-{\color{red} This all needs to be a lot clearer and more organized maybe talk about the primitives here?} 
+standard library for graphics.  We show proof of concept and ease of extraction from the Coq code to OCaml. 
 \end{abstract}
 \tableofcontents
 \newpage
@@ -86,14 +85,14 @@ construct simple proofs about geometric shapes.
 
 \section{Stucture Of code}
 
+
+
+
 \subsection{The Graphics Type Class}
  To begin we have implemented the syntax of a language of graphics commands(g\_com). The semantics of this language are defined in an interesting way, leaving the type of what we will call the current state of the screen as the type Type.  By not specifying the type of the state we are able to
- provide a single implementation of functions that only rely on a small set of primitives that can be changed to reflect a certain goal. 
- {\color{red} Can we say that given the small set of primitives and an instances that seems resonable that specifications over this could be
-   provable for any instance? We should totally add in a dependency for building the graphics primitives.  Like some proofs about draw pixel that
-  make sure it will be equivalent over different instances. }
+ provide a single implementation of functions that only rely on a small set of primitives that can be changed to reflect a certain goal. We are then able to define an instance of the class by meeting the requirments outlined. We currenlty have instantiated two instances of the graphics\_prims type class. \cite{class}
 
-We have times two instances of the graphics\_prims type class.
+
 
 \begin{lstlisting}
    Inductive g_com : Type :=
@@ -131,10 +130,16 @@ We have times two instances of the graphics\_prims type class.
 
 
 
+\subsection{Instances}
+We have two instances of the graphics\_prims type class.  
+
+  \subsubsection{OCaml}
+  \subsubsection{Coq State Map}
+
+
 
   
 
-\subsection{Ocaml}
 
 
 \subsection{Functions for Drawing}
@@ -218,22 +223,6 @@ The following functions are what is used to implement an interpretation of the g
 % This is inline code \lstinline|Fixpoint f(x : nat) := ...| typeset within a line of text.
 
 % \paragraph{Para1.} This is a paragraph, or subsubsection.
-
-
-
-\section{A brief history of Theology of coq and our lord and saviour also coq jesus.}
-
-\section{General description of our theory}
-\section{Similar Projects}
-\subsection{Other similar functional graphics libraries Ocaml}
-\subsection{Geometry stuff}
-
-\subsection{Flattery}
-
-\subsection{Other similar functional graphics libraries} 
-
-
-
 
 
 \section{Proofs}
@@ -326,9 +315,6 @@ Conclusions
 Flattery
 
 
-\subsection{Instances}
-  \subsubsection{OCaml}
-  \subsubsection{Coq State Map}
 
 
 \section{Future Plans}
