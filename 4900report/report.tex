@@ -75,17 +75,18 @@ aspect of Ocaml that led to use using it over any other functional language is
 that Coq is written in Ocaml, which makes translating and exporting functions
 from Ocaml to Coq more intuitive than if we had used another language like
 Haskell or Scheme. We took functions from the Ocaml graphics library like plot,
-open\_graph, color, lineto and implemented equivalent functions in Coq and
+open_graph, color, lineto and implemented equivalent functions in Coq and
 then exported them as Ocaml to be displayed. In addition to recreating some
 of the Ocaml graphics functions in Coq, we also implemented some supporting
-functions like draw\_rect and fill\_rect and we proved some theorems about the
-specifications of these functions.
-Even though there have not been any attempts to implement a graphics library
+functions like draw_rect and fill_rect and we proved some theorems about the
+specifications of these functions.  Even though there have not been any attempts to implement a graphics library
 in coq, there has been research done in the verification of the specifications of
-geometric shapes in Coq. In Pham and Bertot’s paper “A Combination of a Dy-
-namic Geometry Software With a Proof Assistant for Interactive Formal Proofs,”
+geometric shapes in Coq. In Pham and Bertot’s paper “A Combination of a 
+Dynamic Geometry Software With a Proof Assistant for Interactive Formal Proofs,”
 \cite{geo} they adapted Coq’s tactic language to allow users to interactively
 construct simple proofs about geometric shapes.
+
+
 
 \section{Stucture Of code}
 
@@ -130,6 +131,14 @@ We have times two instances of the graphics\_prims type class.
     Context {T : Type} `{graphics_prims T}.
   \end{lstlisting}
 
+
+
+
+
+
+  
+
+\subsection{Ocaml}
 
 
 \subsection{Functions for Drawing}
@@ -218,7 +227,9 @@ The following functions are what is used to implement an interpretation of the g
 
 \subsection{Other similar functional graphics libraries} 
 
-\subsection{Ocaml}
+
+
+
 
 \section{Proofs}
 To prove the correctness of our drawing functions, we first made a specification of whether a point is in a shape, then we proved that if we draw a shape to a state, then, for any point, if that point is in the shape, the color at that point would be equal to the color of the shape we drew, otherwise the color at that point would be the same as the color in the original state.
@@ -348,7 +359,16 @@ We will also add the ability to draw more shapes. We have plans for drawing and 
 The last feature we plan to add is buffers. Our drawing functions could have the ability to draw to a buffer rather than directly to the screen. This buffer could then be drawn to the screen or another buffer. We will add the ability to preform transformations to this buffer, such as translating, rotating, and scaling. Since these are all basic matrix operations, they should be relatively simple to implement.
 
 \section{Conclusion}
-
+In this paper, we outline the creation of our implementation of a graphics
+library in Coq. In this project, we were able to implement all the parts that we
+expected to, but there is still a lot more work that we can do. We are planning
+on adding more functionality to the project and improve some of the existing
+implementation. One improvements that we plan to address is the significant
+amount of time it takes to fill a shape. An example of a future goal would be
+designing more generalized proofs that do not depend on specific implementation
+details. An example of this would be, a conical for what has been drawn to the
+screen and an equality between two states. This project has been a joy to work
+on.
 
 
 \bibliographystyle{plain}
