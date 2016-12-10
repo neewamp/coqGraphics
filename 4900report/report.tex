@@ -193,6 +193,15 @@ The following functions are what is used to implement an interpretation of the g
     interp (init_state tt) e.
    End interp.
  \end{lstlisting}
+ 
+ 
+ The draw\_hline and draw\_vline functions are recursive functions that draw horizontal or vertical lines recursively starting at a point with a size n.
+ 
+ The draw\_rect function draws the border of a rectangle starting a point and uses draw\_hline and draw\_vline to draw the sides
+ 
+ fill\_rect recursively creates h horizontal lines of witdth w recursively using the draw\_hline
+ 
+ 
 % \subsection{Subsection2} This is a second subsection.
 
 
@@ -354,9 +363,11 @@ By extending this to the module system in Coq these specifications could be used
 This provides a proof of concept that using requiring specifications about functions could allow for proofs for any that fits the specifications.
 By extending this to the module system in Coq these specifications could be used to build machinery that would prove useful in more advanced generalizations.  The more general proofs would also provide an intuitive way to apply those proofs to additions to instances of the module.
 
-We will also add the ability to draw more shapes. We have plans for drawing and filling circles, triangles and arbitrary polygons. We have not included those as the complexity of drawing and writing and proving specifications would be outside of the scope of this project.
+We also plan to implement drawing more shapes. We have plans for drawing and filling circles, triangles and arbitrary polygons. We have not included those as the complexity of drawing and writing and proving specifications would be outside of the scope of this project.
 
-The last feature we plan to add is buffers. Our drawing functions could have the ability to draw to a buffer rather than directly to the screen. This buffer could then be drawn to the screen or another buffer. We will add the ability to preform transformations to this buffer, such as translating, rotating, and scaling. Since these are all basic matrix operations, they should be relatively simple to implement.
+Another feature we plan to add is buffers. Our drawing functions could have the ability to draw to a buffer rather than directly to the screen. This buffer could then be drawn to the screen or another buffer. We will add the ability to preform transformations to this buffer, such as translating, rotating, and scaling. Since these are all basic matrix operations, they should be relatively simple to implement.
+
+The last feature we plan to implement is user input. Although coq does not support user-input, we could model the properties of user input in coq, and then leave the implementation to when we export to Ocaml. This would allow us to model an full graphical user interface in coq, which could be used to create simple applications or games.
 
 \section{Conclusion}
 In this paper, we outline the creation of our implementation of a graphics
